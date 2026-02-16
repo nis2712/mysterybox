@@ -53,6 +53,7 @@
     transition:.15s transform;
   }
   .ctrl-btn:hover{ transform:scale(1.03); }
+  .ctrl-btn:disabled{ opacity:.55; cursor:not-allowed; transform:none; }
 
   .grid{
     display:grid;
@@ -73,6 +74,8 @@
     min-height:86px;
   }
   .box:hover{ transform:translateY(-2px) scale(1.02); filter:brightness(1.02); }
+  .box.disabled{ cursor:not-allowed; }
+  .box.disabled:hover{ transform:none; filter:none; }
 
   .num{
     font-size:20px;
@@ -89,6 +92,7 @@
     line-height:1.1;
   }
 
+  /* reveal state */
   .box.revealed{
     background:#ffeaa7;
   }
@@ -146,7 +150,6 @@
     margin:0 0 10px;
     color:#ff7675;
     font-size:28px;
-    text-shadow:1px 1px 0 rgba(0,0,0,.06);
   }
   .popup p{
     margin:10px 0 0;
@@ -233,7 +236,15 @@
   let mode = "hemat";
   let gifts = [];
   let pickedIndex = null;
-  let revealed = false;
+
+  // untuk reveal bertahap
+  let revealStep = 0;          // 0..15
+  let revealTimer = null;
+  let isRevealing = false;
+
+  // ====== atur kecepatan reveal di sini ======
+  const REVEAL_DELAY_MS = 120; // makin kecil makin cepat
+  // ===========================================
 
   function fisherYatesShuffle(arr){
     for(let i=arr.length-1;i>0;i--){
@@ -244,14 +255,17 @@
   }
 
   function resetRound(){
+    stopReveal();
     gifts = fisherYatesShuffle([...POOL[mode]]);
     pickedIndex = null;
-    revealed = false;
+    revealStep = 0;
+    isRevealing = false;
     render();
+    enableControls(true);
   }
 
   function shuffleOnly(){
-    if(revealed) return; // biar ga bisa ubah setelah terbuka
+    if(isRevealing || pickedIndex !== null) return; // jangan ubah saat proses/reveal
     gifts = fisherYatesShuffle(gifts);
     render();
   }
@@ -264,18 +278,43 @@
   }
 
   function pick(i){
-    if(pickedIndex !== null) return; // lock 1 pick per ronde
+    if(pickedIndex !== null || isRevealing) return; // lock
     pickedIndex = i;
+    isRevealing = true;
+    revealStep = 0;
 
-    // 1) reveal all dulu
-    revealed = true;
-    render();
+    // disable kontrol biar ga ke-reset / shuffle saat animasi
+    enableControls(false);
 
-    // 2) baru popup hadiah yang dipilih (delay dikit biar kelihatan reveal)
-    setTimeout(() => {
-      prizeText.textContent = `You got: ${gifts[i]} 🎁`;
-      popup.style.display = "flex";
-    }, 350);
+    // mulai reveal bertahap 1..15
+    revealTimer = setInterval(() => {
+      revealStep++;
+      render();
+
+      if(revealStep >= 15){
+        stopReveal();
+        // setelah semua kebuka, baru popup hadiah terpilih
+        setTimeout(() => {
+          prizeText.textContent = `You got: ${gifts[pickedIndex]} 🎁`;
+          popup.style.display = "flex";
+          enableControls(true); // boleh reset untuk ronde berikutnya
+        }, 250);
+      }
+    }, REVEAL_DELAY_MS);
+  }
+
+  function stopReveal(){
+    if(revealTimer){
+      clearInterval(revealTimer);
+      revealTimer = null;
+    }
+    isRevealing = false;
+  }
+
+  function enableControls(enabled){
+    resetBtn.disabled = !enabled;
+    shuffleBtn.disabled = !enabled;
+    modeBtns.forEach(b => b.disabled = !enabled);
   }
 
   function render(){
@@ -283,13 +322,16 @@
     for(let i=0;i<15;i++){
       const div = document.createElement("div");
       div.className = "box";
-      if(revealed) div.classList.add("revealed");
+
+      const shouldReveal = (i < revealStep); // buka bertahap dari 1 ke 15
+      if(shouldReveal) div.classList.add("revealed");
       if(pickedIndex === i) div.classList.add("picked");
+      if(isRevealing) div.classList.add("disabled");
 
       div.innerHTML = `
         <div class="tag">PICK</div>
         <div class="num">${i+1}</div>
-        <div class="gift">${escapeHtml(gifts[i])}</div>
+        <div class="gift">${shouldReveal ? escapeHtml(gifts[i]) : ""}</div>
       `;
 
       div.onclick = () => pick(i);
@@ -310,7 +352,6 @@
     popup.style.display = "none";
   }
 
-  // close popup when click outside
   popup.addEventListener("click", (e) => {
     if(e.target === popup) closePopup();
   });
