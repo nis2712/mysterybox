@@ -1,504 +1,180 @@
-<!doctype html>
-<html lang="id">
+<!DOCTYPE html>
+<html>
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Live Mystery Boxes</title>
-  <style>
-    :root{
-      --bg1:#070a12;
-      --bg2:#0b1330;
-      --card:#0d1638cc;
-      --stroke:#ffffff1a;
-      --text:#eaf0ff;
-      --muted:#b7c4ffcc;
+<meta charset="UTF-8">
+<title>Fun Surprise Box</title>
+<style>
+body{
+    margin:0;
+    font-family:'Comic Sans MS', Arial, sans-serif;
+    background:linear-gradient(135deg,#74ebd5,#acb6e5);
+    text-align:center;
+    overflow:hidden;
+}
 
-      --hemat:#22c55e;
-      --royal:#3b82f6;
-      --tajir:#f472b6;
+h1{
+    margin-top:20px;
+    color:white;
+    text-shadow:2px 2px 5px rgba(0,0,0,0.3);
+}
 
-      --glow: 0 0 18px rgba(120,150,255,.35);
-      --glow2: 0 0 28px rgba(244,114,182,.22);
-    }
+.grid{
+    display:grid;
+    grid-template-columns:repeat(5,110px);
+    gap:15px;
+    justify-content:center;
+    margin-top:30px;
+}
 
-    *{box-sizing:border-box}
-    body{
-      margin:0;
-      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
-      color:var(--text);
-      background:
-        radial-gradient(1200px 700px at 20% 10%, rgba(59,130,246,.20), transparent 60%),
-        radial-gradient(900px 600px at 85% 30%, rgba(244,114,182,.20), transparent 55%),
-        radial-gradient(900px 700px at 40% 110%, rgba(34,197,94,.15), transparent 55%),
-        linear-gradient(160deg, var(--bg1), var(--bg2));
-      min-height:100vh;
-      overflow:hidden;
-    }
+.box{
+    background:white;
+    border-radius:20px;
+    padding:20px;
+    cursor:pointer;
+    transition:0.2s;
+    box-shadow:0 5px 15px rgba(0,0,0,0.2);
+    font-size:20px;
+    font-weight:bold;
+}
 
-    /* subtle moving noise */
-    body:before{
-      content:"";
-      position:fixed; inset:-20%;
-      background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.14'/%3E%3C/svg%3E");
-      transform:rotate(6deg);
-      pointer-events:none;
-      mix-blend-mode:overlay;
-      animation: drift 12s linear infinite;
-    }
-    @keyframes drift{
-      0%{transform:translate(-2%,-2%) rotate(6deg)}
-      100%{transform:translate(2%,2%) rotate(6deg)}
-    }
+.box:hover{
+    transform:scale(1.05);
+}
 
-    .wrap{
-      width:min(1100px, 96vw);
-      margin:18px auto;
-      padding:16px;
-    }
+.box.opened{
+    background:#ffeaa7;
+}
 
-    .header{
-      display:flex;
-      justify-content:space-between;
-      align-items:flex-end;
-      gap:16px;
-      margin-bottom:12px;
-    }
+.controls{
+    margin-top:20px;
+}
 
-    .title{
-      display:flex;
-      flex-direction:column;
-      gap:6px;
-    }
-    .title h1{
-      margin:0;
-      font-size:28px;
-      letter-spacing:.5px;
-      line-height:1.1;
-      text-shadow: var(--glow);
-    }
-    .subtitle{
-      font-size:13px;
-      color:var(--muted);
-    }
+button{
+    padding:10px 18px;
+    margin:5px;
+    border:none;
+    border-radius:15px;
+    font-size:16px;
+    font-weight:bold;
+    cursor:pointer;
+    background:#ff7675;
+    color:white;
+}
 
-    .panel{
-      display:flex;
-      gap:10px;
-      align-items:center;
-      flex-wrap:wrap;
-      justify-content:flex-end;
-    }
+/* POPUP */
+.popup{
+    position:fixed;
+    top:0;
+    left:0;
+    width:100%;
+    height:100%;
+    background:rgba(0,0,0,0.5);
+    display:none;
+    justify-content:center;
+    align-items:center;
+}
 
-    .pill{
-      border:1px solid var(--stroke);
-      background:rgba(255,255,255,.06);
-      padding:10px 12px;
-      border-radius:14px;
-      box-shadow: var(--glow);
-      backdrop-filter: blur(10px);
-      display:flex;
-      gap:10px;
-      align-items:center;
-    }
+.popup-content{
+    background:white;
+    padding:40px;
+    border-radius:25px;
+    animation:pop 0.4s ease;
+    box-shadow:0 10px 30px rgba(0,0,0,0.3);
+}
 
-    .modeBtn{
-      border:none;
-      cursor:pointer;
-      padding:10px 12px;
-      border-radius:12px;
-      font-weight:900;
-      color:#0b1020;
-      letter-spacing:.4px;
-      transform:translateZ(0);
-      transition: transform .15s ease, filter .15s ease, box-shadow .15s ease;
-    }
-    .modeBtn:hover{ transform: translateY(-1px) scale(1.01); filter:brightness(1.05); }
-    .modeBtn.active{ box-shadow: 0 0 0 2px rgba(255,255,255,.45), var(--glow2); }
+@keyframes pop{
+    0%{transform:scale(0.5);opacity:0;}
+    100%{transform:scale(1);opacity:1;}
+}
 
-    .modeBtn.hemat{ background:linear-gradient(135deg, rgba(34,197,94,1), rgba(34,197,94,.55)); }
-    .modeBtn.royal{ background:linear-gradient(135deg, rgba(59,130,246,1), rgba(59,130,246,.55)); }
-    .modeBtn.tajir{ background:linear-gradient(135deg, rgba(244,114,182,1), rgba(244,114,182,.55)); }
+.popup h2{
+    color:#ff7675;
+    font-size:28px;
+}
 
-    .ctrlBtn{
-      border:1px solid var(--stroke);
-      background:rgba(255,255,255,.06);
-      color:var(--text);
-      cursor:pointer;
-      padding:10px 12px;
-      border-radius:12px;
-      font-weight:800;
-      transition: transform .15s ease, background .15s ease, border-color .15s ease;
-    }
-    .ctrlBtn:hover{ transform:translateY(-1px); background:rgba(255,255,255,.09); border-color:rgba(255,255,255,.20); }
+.popup p{
+    font-size:22px;
+    margin:15px 0;
+}
 
-    .main{
-      display:grid;
-      grid-template-columns: 280px 1fr;
-      gap:14px;
-      align-items:start;
-    }
-
-    .side{
-      border:1px solid var(--stroke);
-      background:rgba(255,255,255,.05);
-      border-radius:18px;
-      padding:14px;
-      box-shadow: var(--glow);
-      backdrop-filter: blur(10px);
-    }
-
-    .badge{
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      gap:10px;
-      padding:10px 12px;
-      border-radius:14px;
-      border:1px solid var(--stroke);
-      background:rgba(0,0,0,.25);
-      margin-bottom:10px;
-    }
-    .badge .left{
-      display:flex; align-items:center; gap:10px;
-      font-weight:900;
-    }
-    .dot{
-      width:10px; height:10px; border-radius:999px;
-      box-shadow: 0 0 10px rgba(255,255,255,.25);
-    }
-    .dot.hemat{ background:var(--hemat); }
-    .dot.royal{ background:var(--royal); }
-    .dot.tajir{ background:var(--tajir); }
-
-    .hint{
-      color:var(--muted);
-      font-size:13px;
-      line-height:1.4;
-    }
-
-    .status{
-      margin-top:12px;
-      padding:12px;
-      border-radius:14px;
-      border:1px dashed rgba(255,255,255,.18);
-      background:rgba(255,255,255,.04);
-      color:var(--muted);
-      font-size:13px;
-    }
-    .status b{ color:var(--text); }
-
-    .gridWrap{
-      border:1px solid var(--stroke);
-      background:rgba(255,255,255,.05);
-      border-radius:18px;
-      padding:14px;
-      box-shadow: var(--glow);
-      backdrop-filter: blur(10px);
-      overflow:hidden;
-    }
-
-    .grid{
-      display:grid;
-      grid-template-columns: repeat(5, minmax(0, 1fr));
-      gap:12px;
-    }
-
-    .card{
-      position:relative;
-      border-radius:16px;
-      padding:14px 12px;
-      min-height:92px;
-      background:
-        radial-gradient(280px 140px at 25% 15%, rgba(255,255,255,.10), transparent 55%),
-        linear-gradient(180deg, rgba(255,255,255,.06), rgba(0,0,0,.18));
-      border:1px solid rgba(255,255,255,.12);
-      cursor:pointer;
-      transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease, filter .15s ease;
-      transform:translateZ(0);
-      overflow:hidden;
-    }
-
-    .card:after{
-      content:"";
-      position:absolute; inset:-40%;
-      background: radial-gradient(circle at 30% 30%, rgba(255,255,255,.20), transparent 55%);
-      transform: rotate(14deg);
-      opacity:.0;
-      transition: opacity .18s ease;
-      pointer-events:none;
-    }
-
-    .card:hover{
-      transform: translateY(-2px);
-      border-color: rgba(255,255,255,.22);
-      box-shadow: 0 12px 30px rgba(0,0,0,.35), var(--glow2);
-      filter:brightness(1.03);
-    }
-    .card:hover:after{ opacity:.9; }
-
-    .numRow{
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      gap:8px;
-    }
-    .num{
-      font-size:18px;
-      font-weight:1000;
-      letter-spacing:.6px;
-      opacity:.95;
-    }
-    .chip{
-      font-size:11px;
-      font-weight:900;
-      padding:5px 8px;
-      border-radius:999px;
-      border:1px solid rgba(255,255,255,.14);
-      background:rgba(255,255,255,.06);
-      color:rgba(255,255,255,.86);
-    }
-
-    .gift{
-      margin-top:10px;
-      font-size:13px;
-      color:rgba(234,240,255,.92);
-      line-height:1.2;
-      display:none;
-      transform:translateY(6px);
-      opacity:0;
-    }
-
-    .card.revealed .gift{
-      display:block;
-      animation: pop .28s ease forwards;
-    }
-    @keyframes pop{
-      to{ transform:translateY(0); opacity:1; }
-    }
-
-    .card.revealed .chip{ opacity:.55; }
-    .card.revealed .num{ opacity:.45; }
-
-    .picked{
-      border-color: rgba(255,215,0,.65) !important;
-      box-shadow: 0 0 0 2px rgba(255,215,0,.22), 0 14px 38px rgba(0,0,0,.40), 0 0 24px rgba(255,215,0,.18) !important;
-    }
-
-    .pickedRibbon{
-      position:absolute;
-      top:10px; right:10px;
-      font-size:11px;
-      font-weight:1000;
-      letter-spacing:.6px;
-      background: linear-gradient(135deg, rgba(255,215,0,1), rgba(255,215,0,.55));
-      color:#12162a;
-      padding:6px 10px;
-      border-radius:999px;
-      display:none;
-    }
-    .picked .pickedRibbon{ display:block; }
-
-    /* reveal shimmer line */
-    .card.revealed:before{
-      content:"";
-      position:absolute; top:-40%; left:-60%;
-      width:60%; height:180%;
-      background: linear-gradient(90deg, transparent, rgba(255,255,255,.16), transparent);
-      transform: rotate(18deg);
-      animation: shine .7s ease;
-      pointer-events:none;
-    }
-    @keyframes shine{
-      to{ left:140%; }
-    }
-
-    /* responsive */
-    @media (max-width: 900px){
-      .main{ grid-template-columns: 1fr; }
-    }
-  </style>
+.close-btn{
+    background:#55efc4;
+    color:#2d3436;
+}
+</style>
 </head>
 <body>
-  <div class="wrap">
-    <div class="header">
-      <div class="title">
-        <h1>🎁 LIVE BOX GAME</h1>
-        <div class="subtitle">Pilih 1 nomor (1–15) → semua hadiah akan terbuka. Cocok untuk overlay TikTok Live Studio.</div>
-      </div>
 
-      <div class="panel">
-        <div class="pill">
-          <button class="modeBtn hemat active" data-mode="hemat">HEMAT</button>
-          <button class="modeBtn royal" data-mode="royal">ROYAL</button>
-          <button class="modeBtn tajir" data-mode="tajir">TAJIR</button>
-        </div>
-        <button class="ctrlBtn" id="shuffleBtn">Shuffle</button>
-        <button class="ctrlBtn" id="resetBtn">Reset</button>
-      </div>
+<h1>🎁 FUN SURPRISE BOX 🎁</h1>
+
+<div class="grid" id="grid"></div>
+
+<div class="controls">
+<button onclick="resetGame()">Reset Game</button>
+</div>
+
+<div class="popup" id="popup">
+    <div class="popup-content">
+        <h2>🎉 Congratulations! 🎉</h2>
+        <p id="prizeText"></p>
+        <button class="close-btn" onclick="closePopup()">OK</button>
     </div>
-
-    <div class="main">
-      <div class="side">
-        <div class="badge">
-          <div class="left"><span class="dot hemat" id="dot"></span><span id="modeLabel">Mode: HEMAT</span></div>
-          <div class="chip" id="priceLabel">1R</div>
-        </div>
-
-        <div class="hint">
-          <b>Cara pakai di live:</b><br>
-          1) Suruh chat pilih angka 1–15<br>
-          2) Kamu klik kotaknya<br>
-          3) Hadiah kebuka semua + highlight pilihan
-        </div>
-
-        <div class="status" id="statusBox">
-          Status: <b>Siap</b><br>
-          Pilihan: <b id="pickedText">Belum ada</b>
-        </div>
-
-        <div class="hint" style="margin-top:10px;">
-          Tips: klik <b>Reset</b> tiap ronde biar posisi hadiah berubah.
-        </div>
-      </div>
-
-      <div class="gridWrap">
-        <div class="grid" id="grid"></div>
-      </div>
-    </div>
-  </div>
+</div>
 
 <script>
-  // ======= EDIT HADIAH DI SINI =======
-  const POOL = {
-    hemat: [
-      "Coin 50", "Coin 75", "Small Potion", "Basic Token", "Coin 100",
-      "Gem 1", "Scroll", "Coin 120", "Basic Crate", "Coin 150",
-      "Key", "Sticker", "Buff 5m", "Token x2", "Bonus"
-    ],
-    royal: [
-      "Coin 300", "Coin 400", "Rare Token", "Gem 10", "Rare Crate",
-      "Coin 500", "Key x2", "Scroll Rare", "Buff 30m", "Token x2",
-      "Gem 15", "Bonus Spin", "Coin 600", "Epic Chance", "Surprise"
-    ],
-    tajir: [
-      "Coin 1000", "Gem 30", "Epic Token", "Epic Crate", "Coin 1500",
-      "Gem 40", "Key x5", "Buff 2h", "Token x3", "Ultra Pack",
-      "Coin 2000", "Gem 50", "SECRET", "Jackpot", "Mega Box"
-    ]
-  };
-  // ==================================
+const prizes = [
+"50 Coins","100 Coins","Small Toy","Magic Candy","Sticker Pack",
+"Mini Pet","Golden Star","Lucky Spin","Mystery Gift","Color Badge",
+"Treasure Box","Sparkle Wand","Super Boost","Rainbow Hat","SECRET PRIZE"
+];
 
-  const PRICE = { hemat:"1R", royal:"5R", tajir:"10R" };
+let selected = false;
+let shuffled = [];
 
-  const gridEl = document.getElementById("grid");
-  const modeBtns = document.querySelectorAll(".modeBtn");
-  const shuffleBtn = document.getElementById("shuffleBtn");
-  const resetBtn = document.getElementById("resetBtn");
-
-  const modeLabel = document.getElementById("modeLabel");
-  const priceLabel = document.getElementById("priceLabel");
-  const statusBox = document.getElementById("statusBox");
-  const pickedText = document.getElementById("pickedText");
-  const dot = document.getElementById("dot");
-
-  let mode = "hemat";
-  let gifts = [];
-  let pickedIndex = null;
-  let revealed = false;
-
-  function fisherYatesShuffle(arr){
-    for(let i = arr.length - 1; i > 0; i--){
-      const j = Math.floor(Math.random() * (i + 1));
-      [arr[i], arr[j]] = [arr[j], arr[i]];
+function shuffle(array){
+    for(let i=array.length-1;i>0;i--){
+        const j=Math.floor(Math.random()*(i+1));
+        [array[i],array[j]]=[array[j],array[i]];
     }
-    return arr;
-  }
+    return array;
+}
 
-  function setMode(newMode){
-    mode = newMode;
-    modeBtns.forEach(b => b.classList.toggle("active", b.dataset.mode === newMode));
-    modeLabel.textContent = "Mode: " + newMode.toUpperCase();
-    priceLabel.textContent = PRICE[newMode];
+function init(){
+    shuffled = shuffle([...prizes]);
+    const grid = document.getElementById("grid");
+    grid.innerHTML="";
+    selected=false;
 
-    dot.className = "dot " + newMode;
-    resetRound();
-  }
-
-  function resetRound(){
-    gifts = fisherYatesShuffle([...POOL[mode]]);
-    pickedIndex = null;
-    revealed = false;
-    pickedText.textContent = "Belum ada";
-    statusBox.innerHTML = `Status: <b>Siap</b><br>Pilihan: <b id="pickedText">Belum ada</b>`;
-    render();
-  }
-
-  function shuffleOnly(){
-    if(revealed) return; // biar ga mengubah hasil setelah reveal
-    gifts = fisherYatesShuffle(gifts);
-    render();
-  }
-
-  function pick(i){
-    if(pickedIndex !== null) return; // 1 pick per ronde
-    pickedIndex = i;
-    revealed = true;
-
-    // update status
-    statusBox.innerHTML = `Status: <b>Terbuka</b><br>Pilihan: <b>${i+1}</b>`;
-
-    render(true);
-  }
-
-  function render(withAnimation=false){
-    gridEl.innerHTML = "";
     for(let i=0;i<15;i++){
-      const card = document.createElement("div");
-      card.className = "card";
-      card.onclick = () => pick(i);
-
-      if(revealed) card.classList.add("revealed");
-      if(pickedIndex === i) card.classList.add("picked");
-
-      const rarity = guessRarity(gifts[i]);
-      const chipText = rarity;
-
-      card.innerHTML = `
-        <div class="pickedRibbon">PICKED</div>
-        <div class="numRow">
-          <div class="num">#${i+1}</div>
-          <div class="chip">${chipText}</div>
-        </div>
-        <div class="gift">${escapeHtml(gifts[i])}</div>
-      `;
-
-      gridEl.appendChild(card);
+        const div=document.createElement("div");
+        div.className="box";
+        div.innerText=i+1;
+        div.onclick=()=>openBox(i,div);
+        grid.appendChild(div);
     }
-  }
+}
 
-  function guessRarity(txt){
-    const t = (txt || "").toLowerCase();
-    if(t.includes("secret") || t.includes("jackpot")) return "ULTRA";
-    if(t.includes("epic") || t.includes("mega") || t.includes("ultra")) return "EPIC";
-    if(t.includes("rare")) return "RARE";
-    return "COMMON";
-  }
+function openBox(index,element){
+    if(selected) return;
+    selected=true;
 
-  function escapeHtml(str){
-    return String(str)
-      .replaceAll("&","&amp;")
-      .replaceAll("<","&lt;")
-      .replaceAll(">","&gt;")
-      .replaceAll('"',"&quot;")
-      .replaceAll("'","&#039;");
-  }
+    element.classList.add("opened");
+    document.getElementById("prizeText").innerText=
+        "You got: "+shuffled[index]+" 🎁";
 
-  modeBtns.forEach(btn => btn.addEventListener("click", () => setMode(btn.dataset.mode)));
-  shuffleBtn.addEventListener("click", shuffleOnly);
-  resetBtn.addEventListener("click", resetRound);
+    document.getElementById("popup").style.display="flex";
+}
 
-  // start
-  resetRound();
+function closePopup(){
+    document.getElementById("popup").style.display="none";
+}
+
+function resetGame(){
+    init();
+}
+
+init();
 </script>
+
 </body>
 </html>
