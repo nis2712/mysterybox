@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Live Mystery Box</title>
+<style>
+body{
+    margin:0;
+    background:#111;
+    font-family:Arial, sans-serif;
+    color:white;
+    text-align:center;
+}
+h1{
+    margin:20px;
+}
+.mode-btn{
+    padding:10px 20px;
+    margin:5px;
+    border:none;
+    border-radius:8px;
+    font-weight:bold;
+    cursor:pointer;
+}
+.hemat{background:#2ecc71;}
+.royal{background:#3498db;}
+.tajir{background:#e84393;}
+
+.grid{
+    display:grid;
+    grid-template-columns:repeat(5,120px);
+    gap:15px;
+    justify-content:center;
+    margin-top:20px;
+}
+
+.box{
+    background:#222;
+    border-radius:12px;
+    padding:20px;
+    cursor:pointer;
+    transition:0.3s;
+    position:relative;
+}
+
+.box:hover{
+    background:#333;
+}
+
+.box.revealed{
+    background:#444;
+}
+
+.box.selected{
+    border:3px solid gold;
+}
+
+.number{
+    font-size:20px;
+    font-weight:bold;
+}
+
+.gift{
+    display:none;
+    margin-top:10px;
+    font-size:14px;
+}
+
+.box.revealed .gift{
+    display:block;
+}
+
+.controls{
+    margin-top:20px;
+}
+
+button{
+    padding:8px 15px;
+    margin:5px;
+    border:none;
+    border-radius:6px;
+    cursor:pointer;
+}
+</style>
+</head>
+<body>
+
+<h1>🎁 LIVE BOX MODE 🎁</h1>
+
+<div>
+<button class="mode-btn hemat" onclick="setMode('hemat')">HEMAT</button>
+<button class="mode-btn royal" onclick="setMode('royal')">ROYAL</button>
+<button class="mode-btn tajir" onclick="setMode('tajir')">TAJIR</button>
+</div>
+
+<div class="grid" id="grid"></div>
+
+<div class="controls">
+<button onclick="shuffle()">Shuffle</button>
+<button onclick="reset()">Reset</button>
+</div>
+
+<script>
+let mode = "hemat";
+let selected = null;
+let gifts = [];
+
+const pool = {
+hemat:[
+"Coin 50","Coin 75","Small Potion","Basic Token","Coin 100",
+"Gem 1","Scroll","Coin 120","Basic Crate","Coin 150",
+"Key","Sticker","Buff 5m","Token x2","Bonus"
+],
+royal:[
+"Coin 300","Coin 400","Rare Token","Gem 10","Rare Crate",
+"Coin 500","Key x2","Scroll Rare","Buff 30m","Token x2",
+"Gem 15","Bonus Spin","Coin 600","Epic Chance","Surprise"
+],
+tajir:[
+"Coin 1000","Gem 30","Epic Token","Epic Crate","Coin 1500",
+"Gem 40","Key x5","Buff 2h","Token x3","Ultra Pack",
+"Coin 2000","Gem 50","SECRET","Jackpot","Mega Box"
+]
+};
+
+function setMode(m){
+mode = m;
+reset();
+}
+
+function shuffle(){
+gifts.sort(()=>Math.random()-0.5);
+render();
+}
+
+function reset(){
+selected = null;
+gifts = [...pool[mode]];
+shuffle();
+}
+
+function reveal(index){
+if(selected !== null) return;
+selected = index;
+document.querySelectorAll('.box').forEach((box,i)=>{
+box.classList.add('revealed');
+if(i === index) box.classList.add('selected');
+});
+}
+
+function render(){
+const grid = document.getElementById("grid");
+grid.innerHTML="";
+for(let i=0;i<15;i++){
+let div = document.createElement("div");
+div.className="box";
+div.innerHTML=`
+<div class="number">${i+1}</div>
+<div class="gift">${gifts[i]}</div>
+`;
+div.onclick=()=>reveal(i);
+grid.appendChild(div);
+}
+}
+
+reset();
+render();
+</script>
+
+</body>
+</html>
