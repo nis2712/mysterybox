@@ -1,179 +1,325 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta charset="UTF-8">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>Fun Surprise Box</title>
 <style>
-body{
+  body{
     margin:0;
     font-family:'Comic Sans MS', Arial, sans-serif;
     background:linear-gradient(135deg,#74ebd5,#acb6e5);
     text-align:center;
     overflow:hidden;
-}
+  }
+  h1{ margin:18px 0 10px; color:white; text-shadow:2px 2px 6px rgba(0,0,0,.25); }
 
-h1{
-    margin-top:20px;
-    color:white;
-    text-shadow:2px 2px 5px rgba(0,0,0,0.3);
-}
-
-.grid{
-    display:grid;
-    grid-template-columns:repeat(5,110px);
-    gap:15px;
+  .topbar{
+    display:flex;
     justify-content:center;
-    margin-top:30px;
-}
+    gap:10px;
+    flex-wrap:wrap;
+    padding:8px 12px;
+  }
 
-.box{
-    background:white;
-    border-radius:20px;
-    padding:20px;
-    cursor:pointer;
-    transition:0.2s;
-    box-shadow:0 5px 15px rgba(0,0,0,0.2);
-    font-size:20px;
-    font-weight:bold;
-}
-
-.box:hover{
-    transform:scale(1.05);
-}
-
-.box.opened{
-    background:#ffeaa7;
-}
-
-.controls{
-    margin-top:20px;
-}
-
-button{
+  .mode-btn{
     padding:10px 18px;
-    margin:5px;
     border:none;
-    border-radius:15px;
+    border-radius:18px;
     font-size:16px;
-    font-weight:bold;
+    font-weight:900;
+    cursor:pointer;
+    color:white;
+    box-shadow:0 6px 14px rgba(0,0,0,.18);
+    transition:.15s transform;
+  }
+  .mode-btn:hover{ transform:scale(1.03); }
+  .mode-btn.active{ outline:3px solid rgba(255,255,255,.7); }
+
+  .hemat{ background:#2ecc71; }
+  .royal{ background:#3498db; }
+  .tajir{ background:#e84393; }
+
+  .ctrl-btn{
+    padding:10px 16px;
+    border:none;
+    border-radius:18px;
+    font-size:15px;
+    font-weight:900;
     cursor:pointer;
     background:#ff7675;
     color:white;
-}
+    box-shadow:0 6px 14px rgba(0,0,0,.18);
+    transition:.15s transform;
+  }
+  .ctrl-btn:hover{ transform:scale(1.03); }
 
-/* POPUP */
-.popup{
+  .grid{
+    display:grid;
+    grid-template-columns:repeat(5,110px);
+    gap:14px;
+    justify-content:center;
+    padding:18px 12px 28px;
+  }
+
+  .box{
+    background:white;
+    border-radius:22px;
+    padding:16px 10px;
+    cursor:pointer;
+    box-shadow:0 8px 18px rgba(0,0,0,.18);
+    transition:.18s transform, .18s filter;
+    position:relative;
+    min-height:86px;
+  }
+  .box:hover{ transform:translateY(-2px) scale(1.02); filter:brightness(1.02); }
+
+  .num{
+    font-size:20px;
+    font-weight:1000;
+    color:#2d3436;
+  }
+
+  .gift{
+    margin-top:10px;
+    font-size:14px;
+    font-weight:900;
+    color:#2d3436;
+    display:none;
+    line-height:1.1;
+  }
+
+  .box.revealed{
+    background:#ffeaa7;
+  }
+  .box.revealed .gift{
+    display:block;
+    animation:popText .22s ease forwards;
+    opacity:0;
+    transform:translateY(6px);
+  }
+  @keyframes popText{
+    to{ opacity:1; transform:translateY(0); }
+  }
+
+  .box.picked{
+    outline:4px solid rgba(255,215,0,.85);
+    box-shadow:0 10px 22px rgba(0,0,0,.22), 0 0 0 6px rgba(255,215,0,.18);
+  }
+  .tag{
+    position:absolute;
+    top:10px; right:10px;
+    background:rgba(255,215,0,.95);
+    color:#2d3436;
+    font-weight:1000;
+    font-size:11px;
+    padding:4px 8px;
+    border-radius:999px;
+    display:none;
+  }
+  .box.picked .tag{ display:block; }
+
+  /* POPUP */
+  .popup{
     position:fixed;
-    top:0;
-    left:0;
-    width:100%;
-    height:100%;
-    background:rgba(0,0,0,0.5);
+    inset:0;
+    background:rgba(0,0,0,0.45);
     display:none;
     justify-content:center;
     align-items:center;
-}
-
-.popup-content{
+    padding:16px;
+  }
+  .popup-content{
     background:white;
-    padding:40px;
-    border-radius:25px;
-    animation:pop 0.4s ease;
-    box-shadow:0 10px 30px rgba(0,0,0,0.3);
-}
-
-@keyframes pop{
-    0%{transform:scale(0.5);opacity:0;}
-    100%{transform:scale(1);opacity:1;}
-}
-
-.popup h2{
+    padding:26px 22px;
+    border-radius:26px;
+    max-width:520px;
+    width:100%;
+    box-shadow:0 18px 40px rgba(0,0,0,.35);
+    animation:pop .35s ease;
+  }
+  @keyframes pop{
+    0%{ transform:scale(0.7); opacity:0; }
+    100%{ transform:scale(1); opacity:1; }
+  }
+  .popup h2{
+    margin:0 0 10px;
     color:#ff7675;
     font-size:28px;
-}
-
-.popup p{
+    text-shadow:1px 1px 0 rgba(0,0,0,.06);
+  }
+  .popup p{
+    margin:10px 0 0;
     font-size:22px;
-    margin:15px 0;
-}
-
-.close-btn{
+    font-weight:1000;
+    color:#2d3436;
+  }
+  .close-btn{
+    margin-top:16px;
+    padding:10px 18px;
+    border:none;
+    border-radius:18px;
+    font-size:16px;
+    font-weight:1000;
+    cursor:pointer;
     background:#55efc4;
     color:#2d3436;
-}
+  }
+
+  .note{
+    color:white;
+    font-weight:900;
+    text-shadow:2px 2px 6px rgba(0,0,0,.18);
+    margin-bottom:4px;
+  }
 </style>
 </head>
 <body>
 
 <h1>🎁 FUN SURPRISE BOX 🎁</h1>
+<div class="note" id="modeNote">Mode: HEMAT (1R)</div>
+
+<div class="topbar">
+  <button class="mode-btn hemat active" data-mode="hemat">HEMAT</button>
+  <button class="mode-btn royal" data-mode="royal">ROYAL</button>
+  <button class="mode-btn tajir" data-mode="tajir">TAJIR</button>
+
+  <button class="ctrl-btn" id="resetBtn">Reset</button>
+  <button class="ctrl-btn" id="shuffleBtn">Shuffle</button>
+</div>
 
 <div class="grid" id="grid"></div>
 
-<div class="controls">
-<button onclick="resetGame()">Reset Game</button>
-</div>
-
 <div class="popup" id="popup">
-    <div class="popup-content">
-        <h2>🎉 Congratulations! 🎉</h2>
-        <p id="prizeText"></p>
-        <button class="close-btn" onclick="closePopup()">OK</button>
-    </div>
+  <div class="popup-content">
+    <h2>🎉 CONGRATS! 🎉</h2>
+    <p id="prizeText"></p>
+    <button class="close-btn" onclick="closePopup()">OK</button>
+  </div>
 </div>
 
 <script>
-const prizes = [
-"50 Coins","100 Coins","Small Toy","Magic Candy","Sticker Pack",
-"Mini Pet","Golden Star","Lucky Spin","Mystery Gift","Color Badge",
-"Treasure Box","Sparkle Wand","Super Boost","Rainbow Hat","SECRET PRIZE"
-];
+  // ====== EDIT HADIAH DI SINI (WAJIB 15 ITEM PER MODE) ======
+  const POOL = {
+    hemat: [
+      "Coin 50","Coin 75","Candy","Sticker Pack","Coin 100",
+      "Mini Toy","Lucky Star","Small Boost","Mystery Gift","Badge",
+      "Treasure Mini","Sparkle Wand","Token x2","Gift Pack","Bonus"
+    ],
+    royal: [
+      "Coin 300","Coin 400","Rare Candy","Gem 10","Royal Pack",
+      "Coin 500","Key x2","Boost 30m","Token x2","Lucky Spin",
+      "Gem 15","Big Pack","Coin 600","Surprise Box","Special Bonus"
+    ],
+    tajir: [
+      "Coin 1000","Gem 30","Epic Token","Epic Pack","Coin 1500",
+      "Gem 40","Key x5","Boost 2h","Token x3","Ultra Pack",
+      "Coin 2000","Gem 50","SECRET PRIZE","Jackpot","Mega Box"
+    ]
+  };
+  // ==========================================================
 
-let selected = false;
-let shuffled = [];
+  const PRICE = { hemat:"1R", royal:"5R", tajir:"10R" };
 
-function shuffle(array){
-    for(let i=array.length-1;i>0;i--){
-        const j=Math.floor(Math.random()*(i+1));
-        [array[i],array[j]]=[array[j],array[i]];
+  const grid = document.getElementById("grid");
+  const popup = document.getElementById("popup");
+  const prizeText = document.getElementById("prizeText");
+  const modeNote = document.getElementById("modeNote");
+
+  const modeBtns = document.querySelectorAll(".mode-btn");
+  const resetBtn = document.getElementById("resetBtn");
+  const shuffleBtn = document.getElementById("shuffleBtn");
+
+  let mode = "hemat";
+  let gifts = [];
+  let pickedIndex = null;
+  let revealed = false;
+
+  function fisherYatesShuffle(arr){
+    for(let i=arr.length-1;i>0;i--){
+      const j = Math.floor(Math.random()*(i+1));
+      [arr[i],arr[j]] = [arr[j],arr[i]];
     }
-    return array;
-}
+    return arr;
+  }
 
-function init(){
-    shuffled = shuffle([...prizes]);
-    const grid = document.getElementById("grid");
-    grid.innerHTML="";
-    selected=false;
+  function resetRound(){
+    gifts = fisherYatesShuffle([...POOL[mode]]);
+    pickedIndex = null;
+    revealed = false;
+    render();
+  }
 
+  function shuffleOnly(){
+    if(revealed) return; // biar ga bisa ubah setelah terbuka
+    gifts = fisherYatesShuffle(gifts);
+    render();
+  }
+
+  function setMode(newMode){
+    mode = newMode;
+    modeBtns.forEach(b => b.classList.toggle("active", b.dataset.mode === newMode));
+    modeNote.textContent = `Mode: ${newMode.toUpperCase()} (${PRICE[newMode]})`;
+    resetRound();
+  }
+
+  function pick(i){
+    if(pickedIndex !== null) return; // lock 1 pick per ronde
+    pickedIndex = i;
+
+    // 1) reveal all dulu
+    revealed = true;
+    render();
+
+    // 2) baru popup hadiah yang dipilih (delay dikit biar kelihatan reveal)
+    setTimeout(() => {
+      prizeText.textContent = `You got: ${gifts[i]} 🎁`;
+      popup.style.display = "flex";
+    }, 350);
+  }
+
+  function render(){
+    grid.innerHTML = "";
     for(let i=0;i<15;i++){
-        const div=document.createElement("div");
-        div.className="box";
-        div.innerText=i+1;
-        div.onclick=()=>openBox(i,div);
-        grid.appendChild(div);
+      const div = document.createElement("div");
+      div.className = "box";
+      if(revealed) div.classList.add("revealed");
+      if(pickedIndex === i) div.classList.add("picked");
+
+      div.innerHTML = `
+        <div class="tag">PICK</div>
+        <div class="num">${i+1}</div>
+        <div class="gift">${escapeHtml(gifts[i])}</div>
+      `;
+
+      div.onclick = () => pick(i);
+      grid.appendChild(div);
     }
-}
+  }
 
-function openBox(index,element){
-    if(selected) return;
-    selected=true;
+  function escapeHtml(str){
+    return String(str)
+      .replaceAll("&","&amp;")
+      .replaceAll("<","&lt;")
+      .replaceAll(">","&gt;")
+      .replaceAll('"',"&quot;")
+      .replaceAll("'","&#039;");
+  }
 
-    element.classList.add("opened");
-    document.getElementById("prizeText").innerText=
-        "You got: "+shuffled[index]+" 🎁";
+  function closePopup(){
+    popup.style.display = "none";
+  }
 
-    document.getElementById("popup").style.display="flex";
-}
+  // close popup when click outside
+  popup.addEventListener("click", (e) => {
+    if(e.target === popup) closePopup();
+  });
 
-function closePopup(){
-    document.getElementById("popup").style.display="none";
-}
+  modeBtns.forEach(btn => btn.addEventListener("click", () => setMode(btn.dataset.mode)));
+  resetBtn.addEventListener("click", resetRound);
+  shuffleBtn.addEventListener("click", shuffleOnly);
 
-function resetGame(){
-    init();
-}
-
-init();
+  resetRound();
 </script>
 
 </body>
