@@ -70,6 +70,7 @@
     gap:14px;
     justify-content:center;
     padding:14px 12px 26px;
+    position:relative; /* penting untuk overlay shuffle */
   }
 
   .box{
@@ -338,6 +339,54 @@
     opacity:.85;
     line-height:1.4;
   }
+
+  /* =========================
+     ✅ SHUFFLE GIMMICK (NO SPOILER)
+     ========================= */
+  .shuffling .box{
+    animation: shuffleShake .42s ease-in-out infinite;
+    filter: blur(.2px) brightness(1.02);
+  }
+  @keyframes shuffleShake{
+    0%{ transform:translate(0,0) rotate(0deg); }
+    25%{ transform:translate(-3px,2px) rotate(-1.8deg); }
+    50%{ transform:translate(3px,-2px) rotate(1.8deg); }
+    75%{ transform:translate(-2px,-2px) rotate(-1deg); }
+    100%{ transform:translate(0,0) rotate(0deg); }
+  }
+
+  .shuffleOverlay{
+    position:absolute;
+    inset:0;
+    background:rgba(255,255,255,.68);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:10px;
+    font-size:30px;
+    font-weight:1000;
+    color:#111;
+    backdrop-filter: blur(4px);
+    z-index:10;
+    border-radius:18px;
+  }
+  .dots{
+    display:inline-flex;
+    gap:6px;
+    align-items:center;
+  }
+  .dot{
+    width:10px;height:10px;border-radius:999px;
+    background:#111;
+    opacity:.25;
+    animation: dotPulse 1s infinite;
+  }
+  .dot:nth-child(2){ animation-delay:.15s; }
+  .dot:nth-child(3){ animation-delay:.3s; }
+  @keyframes dotPulse{
+    0%,100%{ opacity:.25; transform:translateY(0); }
+    50%{ opacity:.9; transform:translateY(-4px); }
+  }
 </style>
 </head>
 <body>
@@ -462,10 +511,14 @@
   let slots = [];           // length 15, each: {name, img}
   let pickedIndex = null;
   let isRevealing = false;
+  let isShuffling = false;
 
   // ✅ Ubah ini kalau mau lebih pelan/cepat
   const STAGGER_MS = 80;    // 70-110 biasanya enak
   const POPUP_DELAY_MS = 260;
+
+  // ✅ Durasi gimmick shuffle (tidak bocor hadiah)
+  const SHUFFLE_ANIM_MS = 1200;
 
   function fisherYatesShuffle(arr){
     for(let i=arr.length-1;i>0;i--){
@@ -495,18 +548,46 @@
   function resetRound(){
     pickedIndex = null;
     isRevealing = false;
+    isShuffling = false;
     enableControls(true);
     slots = buildSlotsFromConfig(mode);
     render(false);
   }
 
+  // ✅ SHUFFLE GIMMICK (NO SPOILER)
   function shuffleOnly(){
-    if(isRevealing || pickedIndex !== null) return;
-    slots = fisherYatesShuffle(slots);
+    if(isRevealing || pickedIndex !== null || isShuffling) return;
+
+    isShuffling = true;
+    enableControls(false);
+
+    // overlay "SHUFFLING..."
+    const overlay = document.createElement("div");
+    overlay.className = "shuffleOverlay";
+    overlay.innerHTML = `🔀 SHUFFLING <span class="dots"><span class="dot"></span><span class="dot"></span><span class="dot"></span></span>`;
+    grid.appendChild(overlay);
+
+    // shake effect
+    grid.classList.add("shuffling");
+
+    // selama shuffle, hadiah TETAP tertutup (render(false))
     render(false);
+
+    setTimeout(() => {
+      // shuffle beneran di backend
+      slots = fisherYatesShuffle(slots);
+
+      grid.classList.remove("shuffling");
+      overlay.remove();
+
+      render(false); // tetap tidak bocor hadiah
+      enableControls(true);
+      isShuffling = false;
+    }, SHUFFLE_ANIM_MS);
   }
 
   function setMode(newMode){
+    if(isShuffling) return;
     mode = newMode;
     modeBtns.forEach(b => b.classList.toggle("active", b.dataset.mode === newMode));
     modeNote.textContent = `Mode: ${newMode.toUpperCase()} (${PRICE[newMode]})`;
@@ -514,7 +595,7 @@
   }
 
   function pick(i){
-    if(pickedIndex !== null || isRevealing) return;
+    if(pickedIndex !== null || isRevealing || isShuffling) return;
     pickedIndex = i;
     isRevealing = true;
     enableControls(false);
@@ -538,7 +619,7 @@
     for(let i=0;i<15;i++){
       const div = document.createElement("div");
       div.className = "box";
-      if(isRevealing) div.classList.add("disabled");
+      if(isRevealing || isShuffling) div.classList.add("disabled");
       if(reveal) div.classList.add("revealed");
       if(pickedIndex === i) div.classList.add("picked");
 
@@ -548,6 +629,7 @@
       const prize = slots[i];
       const imgSrc = prize?.img || makeEmojiDataUrl("🎁");
 
+      // ⚠️ Jangan bocor: saat reveal=false, gift tetap hidden karena .gift display:none
       div.innerHTML = `
         <div class="tag">PICK</div>
         <div class="num">${i+1}</div>
@@ -587,7 +669,7 @@
     return String(str)
       .replaceAll("&","&amp;")
       .replaceAll("<","&lt;")
-      .replaceAll(">","&gt;")
+      .replaceAll(">","&lt;")
       .replaceAll('"',"&quot;")
       .replaceAll("'","&#039;");
   }
