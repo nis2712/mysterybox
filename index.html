@@ -17,16 +17,18 @@
     --btn2:#55efc4;
   }
 
+  /* ✅ Scroll ON */
   body{
-  margin:0;
-  font-family:'Comic Sans MS', Arial, sans-serif;
-  background:linear-gradient(135deg,var(--bg1),var(--bg2));
-  text-align:center;
+    margin:0;
+    font-family:'Comic Sans MS', Arial, sans-serif;
+    background:linear-gradient(135deg,var(--bg1),var(--bg2));
+    text-align:center;
+    overflow-x:hidden;
+    overflow-y:auto;
+  }
+  /* ✅ lock scroll only when popup open */
+  body.modal-open{ overflow:hidden; }
 
-  overflow-x:hidden;
-  overflow-y:auto;
-}
-  body.modal-open{ overflow:hidden;}
   h1{
     margin:16px 0 8px;
     color:white;
@@ -73,7 +75,7 @@
     gap:14px;
     justify-content:center;
     padding:14px 12px 26px;
-    position:relative; /* penting untuk overlay shuffle */
+    position:relative;
   }
 
   .box{
@@ -102,7 +104,6 @@
     line-height:1;
   }
 
-  /* hadiah (gambar) */
   .gift{
     margin-top:10px;
     display:none;
@@ -125,13 +126,9 @@
     transform: translateY(6px);
   }
 
-  /* state open */
-  .box.revealed{
-    background:var(--open);
-  }
+  .box.revealed{ background:var(--open); }
   .box.revealed .gift{ display:block; }
 
-  /* Smooth stagger reveal */
   .box.revealed .giftImg,
   .box.revealed .giftName{
     animation: revealPop .45s cubic-bezier(.2,.85,.2,1) forwards;
@@ -142,7 +139,6 @@
     to{ opacity:1; transform: translateY(0) scale(1); }
   }
 
-  /* highlight picked */
   .box.picked{
     outline:4px solid rgba(255,215,0,.85);
     box-shadow: 0 10px 22px rgba(0,0,0,.22), 0 0 0 6px rgba(255,215,0,.18);
@@ -160,7 +156,6 @@
   }
   .box.picked .tag{ display:block; }
 
-  /* POPUP */
   .popup{
     position:fixed;
     inset:0;
@@ -213,7 +208,6 @@
     color:var(--text);
   }
 
-  /* ADMIN */
   .adminWrap{
     width:min(980px, 96vw);
     margin:14px auto 28px;
@@ -262,7 +256,6 @@
 
   .rows{ margin-top:12px; display:flex; flex-direction:column; gap:10px; }
 
-  /* ✅ FIX: layout admin biar "Jumlah" jelas dan ga ketutup */
   .row{
     display:grid;
     grid-template-columns: 110px 1fr 320px;
@@ -343,9 +336,7 @@
     line-height:1.4;
   }
 
-  /* =========================
-     ✅ SHUFFLE GIMMICK (NO SPOILER)
-     ========================= */
+  /* ✅ SHUFFLE GIMMICK (NO SPOILER) */
   .shuffling .box{
     animation: shuffleShake .42s ease-in-out infinite;
     filter: blur(.2px) brightness(1.02);
@@ -372,12 +363,9 @@
     backdrop-filter: blur(4px);
     z-index:10;
     border-radius:18px;
+    pointer-events:none;
   }
-  .dots{
-    display:inline-flex;
-    gap:6px;
-    align-items:center;
-  }
+  .dots{ display:inline-flex; gap:6px; align-items:center; }
   .dot{
     width:10px;height:10px;border-radius:999px;
     background:#111;
@@ -394,7 +382,6 @@
 </head>
 <body>
 
-<!-- OVERLAY UI -->
 <div id="overlayUI">
   <h1>🎁 FUN SURPRISE BOX 🎁</h1>
   <div class="note" id="modeNote">Mode: HEMAT (1R)</div>
@@ -411,17 +398,15 @@
   <div class="grid" id="grid"></div>
 </div>
 
-<!-- POPUP -->
 <div class="popup" id="popup">
   <div class="popup-content">
     <h2>🎉 CONGRATS! 🎉</h2>
     <img id="popupImg" class="popupPrizeImg" alt="">
     <div id="popupName" class="popupPrizeName"></div>
-    <button class="close-btn" onclick="closePopup()">OK</button>
+    <button class="close-btn" id="popupOkBtn">OK</button>
   </div>
 </div>
 
-<!-- ADMIN UI -->
 <div id="adminUI" style="display:none;">
   <div class="adminWrap">
     <div class="adminHeader">
@@ -455,9 +440,6 @@
 </div>
 
 <script>
-  // ==========================
-  // 1) DEFAULT (kalau belum ada setting admin)
-  // ==========================
   const DEFAULT_CONFIG = {
     hemat: [
       { name:"Coin 50", count:5, img:null },
@@ -480,7 +462,7 @@
   };
 
   const PRICE = { hemat:"1R", royal:"5R", tajir:"10R" };
-  const STORAGE_KEY = "fun_box_config_v2";
+  const STORAGE_KEY = "fun_box_config_v3_fixed";
 
   function loadConfig(){
     try{
@@ -497,13 +479,11 @@
 
   let CONFIG = loadConfig();
 
-  // ==========================
-  // 2) OVERLAY LOGIC (smooth reveal)
-  // ==========================
   const grid = document.getElementById("grid");
   const popup = document.getElementById("popup");
   const popupImg = document.getElementById("popupImg");
   const popupName = document.getElementById("popupName");
+  const popupOkBtn = document.getElementById("popupOkBtn");
   const modeNote = document.getElementById("modeNote");
 
   const modeBtns = document.querySelectorAll(".mode-btn");
@@ -511,16 +491,13 @@
   const shuffleBtn = document.getElementById("shuffleBtn");
 
   let mode = "hemat";
-  let slots = [];           // length 15, each: {name, img}
+  let slots = [];
   let pickedIndex = null;
   let isRevealing = false;
   let isShuffling = false;
 
-  // ✅ Ubah ini kalau mau lebih pelan/cepat
-  const STAGGER_MS = 80;    // 70-110 biasanya enak
+  const STAGGER_MS = 80;
   const POPUP_DELAY_MS = 260;
-
-  // ✅ Durasi gimmick shuffle (tidak bocor hadiah)
   const SHUFFLE_ANIM_MS = 1200;
 
   function fisherYatesShuffle(arr){
@@ -540,12 +517,15 @@
         expanded.push({ name: it.name || "Hadiah", img: it.img || null });
       }
     }
-
-    // safety: harus 15
     while(expanded.length < 15) expanded.push({ name:"?", img:null });
     while(expanded.length > 15) expanded.pop();
-
     return fisherYatesShuffle(expanded);
+  }
+
+  function enableControls(enabled){
+    resetBtn.disabled = !enabled;
+    shuffleBtn.disabled = !enabled;
+    modeBtns.forEach(b => b.disabled = !enabled);
   }
 
   function resetRound(){
@@ -557,44 +537,50 @@
     render(false);
   }
 
-  // ✅ SHUFFLE GIMMICK (NO SPOILER)
   function shuffleOnly(){
     if(isRevealing || pickedIndex !== null || isShuffling) return;
 
     isShuffling = true;
     enableControls(false);
 
-    // overlay "SHUFFLING..."
+    render(false); // render first (render clears grid)
+
     const overlay = document.createElement("div");
     overlay.className = "shuffleOverlay";
     overlay.innerHTML = `🔀 SHUFFLING <span class="dots"><span class="dot"></span><span class="dot"></span><span class="dot"></span></span>`;
     grid.appendChild(overlay);
 
-    // shake effect
     grid.classList.add("shuffling");
 
-    // selama shuffle, hadiah TETAP tertutup (render(false))
-    render(false);
-
     setTimeout(() => {
-      // shuffle beneran di backend
       slots = fisherYatesShuffle(slots);
 
       grid.classList.remove("shuffling");
       overlay.remove();
 
-      render(false); // tetap tidak bocor hadiah
+      render(false);
       enableControls(true);
       isShuffling = false;
     }, SHUFFLE_ANIM_MS);
   }
 
   function setMode(newMode){
-    if(isShuffling) return;
+    if(isShuffling || isRevealing) return;
     mode = newMode;
     modeBtns.forEach(b => b.classList.toggle("active", b.dataset.mode === newMode));
     modeNote.textContent = `Mode: ${newMode.toUpperCase()} (${PRICE[newMode]})`;
     resetRound();
+  }
+
+  function openPopup(prize){
+    popupImg.src = prize.img || makeEmojiDataUrl("🎁");
+    popupName.textContent = prize.name || "Hadiah!";
+    popup.style.display = "flex";
+    document.body.classList.add("modal-open");
+  }
+  function closePopup(){
+    popup.style.display = "none";
+    document.body.classList.remove("modal-open");
   }
 
   function pick(i){
@@ -603,20 +589,14 @@
     isRevealing = true;
     enableControls(false);
 
-    // reveal bertahap via delay CSS
     render(true);
 
-    // popup setelah semua kotak “selesai” reveal
     const totalTime = (15 * STAGGER_MS) + 520;
-setTimeout(() => {
-  const prize = slots[pickedIndex];
-  popupImg.src = prize.img || makeEmojiDataUrl("🎁");
-  popupName.textContent = prize.name || "Hadiah!";
-  popup.style.display = "flex";
-  document.body.classList.add("modal-open");
-  enableControls(true);
-}, totalTime + POPUP_DELAY_MS);
-
+    setTimeout(() => {
+      openPopup(slots[pickedIndex]);
+      enableControls(true);
+    }, totalTime + POPUP_DELAY_MS);
+  }
 
   function render(reveal){
     grid.innerHTML = "";
@@ -626,14 +606,11 @@ setTimeout(() => {
       if(isRevealing || isShuffling) div.classList.add("disabled");
       if(reveal) div.classList.add("revealed");
       if(pickedIndex === i) div.classList.add("picked");
-
-      // stagger delay (1 → 15)
       div.style.setProperty("--d", (i * STAGGER_MS) + "ms");
 
       const prize = slots[i];
       const imgSrc = prize?.img || makeEmojiDataUrl("🎁");
 
-      // ⚠️ Jangan bocor: saat reveal=false, gift tetap hidden karena .gift display:none
       div.innerHTML = `
         <div class="tag">PICK</div>
         <div class="num">${i+1}</div>
@@ -647,19 +624,9 @@ setTimeout(() => {
     }
   }
 
-  function enableControls(enabled){
-    resetBtn.disabled = !enabled;
-    shuffleBtn.disabled = !enabled;
-    modeBtns.forEach(b => b.disabled = !enabled);
-  }
-
-  function closePopup(){
-  popup.style.display = "none";
-  document.body.classList.remove("modal-open");
-}
-  popup.addEventListener("click", (e) => {
-    if(e.target === popup) closePopup();
-  });
+  popupOkBtn.addEventListener("click", closePopup);
+  popup.addEventListener("click", (e) => { if(e.target === popup) closePopup(); });
+  window.addEventListener("keydown", (e) => { if(e.key === "Escape" && popup.style.display === "flex") closePopup(); });
 
   function makeEmojiDataUrl(emoji){
     const svg =
@@ -674,17 +641,18 @@ setTimeout(() => {
     return String(str)
       .replaceAll("&","&amp;")
       .replaceAll("<","&lt;")
-      .replaceAll(">","&lt;")
+      .replaceAll(">","&gt;")
       .replaceAll('"',"&quot;")
       .replaceAll("'","&#039;");
   }
   function escapeAttr(str){
-    return String(str).replaceAll('"',"&quot;").replaceAll("<","&lt;").replaceAll(">","&gt;");
+    return String(str)
+      .replaceAll('"',"&quot;")
+      .replaceAll("<","&lt;")
+      .replaceAll(">","&gt;");
   }
 
-  // ==========================
-  // 3) ADMIN UI (rarity + upload)
-  // ==========================
+  // ===== ADMIN =====
   const isAdmin = new URLSearchParams(location.search).get("admin") === "1";
   const overlayUI = document.getElementById("overlayUI");
   const adminUI = document.getElementById("adminUI");
@@ -698,6 +666,21 @@ setTimeout(() => {
   const resetDefaultBtn = document.getElementById("resetDefaultBtn");
 
   let adminMode = "hemat";
+
+  function fileToDataUrl(file){
+    return new Promise((resolve, reject) => {
+      const r = new FileReader();
+      r.onload = () => resolve(String(r.result));
+      r.onerror = reject;
+      r.readAsDataURL(file);
+    });
+  }
+
+  function adminSetMode(m){
+    adminMode = m;
+    tabEls.forEach(t => t.classList.toggle("active", t.dataset.mode === m));
+    adminRender();
+  }
 
   function adminRender(){
     rowsEl.innerHTML = "";
@@ -733,7 +716,6 @@ setTimeout(() => {
       del.className = "del";
       del.textContent = "Hapus";
 
-      // ✅ Rarity (Jumlah) + persen
       const countInput = document.createElement("input");
       countInput.className = "count";
       countInput.type = "number";
@@ -764,7 +746,6 @@ setTimeout(() => {
       rightPack.appendChild(file);
       rightPack.appendChild(del);
 
-      // events
       nameInput.addEventListener("input", () => {
         CONFIG[adminMode][idx].name = nameInput.value;
       });
@@ -778,7 +759,6 @@ setTimeout(() => {
       file.addEventListener("change", async () => {
         const f = file.files?.[0];
         if(!f) return;
-
         const dataUrl = await fileToDataUrl(f);
         CONFIG[adminMode][idx].img = dataUrl;
         img.src = dataUrl;
@@ -795,27 +775,11 @@ setTimeout(() => {
       rowsEl.appendChild(row);
     });
 
-    // total count info
     const total = (CONFIG[adminMode] || []).reduce((s,it)=>s + (parseInt(it.count||0,10)||0), 0);
     const info = document.createElement("div");
     info.className = "help";
     info.innerHTML = `Total kotak untuk mode <b>${adminMode.toUpperCase()}</b>: <b>${total}</b> (harus <b>15</b>).`;
     rowsEl.appendChild(info);
-  }
-
-  function fileToDataUrl(file){
-    return new Promise((resolve, reject) => {
-      const r = new FileReader();
-      r.onload = () => resolve(String(r.result));
-      r.onerror = reject;
-      r.readAsDataURL(file);
-    });
-  }
-
-  function adminSetMode(m){
-    adminMode = m;
-    tabEls.forEach(t => t.classList.toggle("active", t.dataset.mode === m));
-    adminRender();
   }
 
   function validateAll(){
@@ -844,13 +808,13 @@ setTimeout(() => {
     alert("Saved! Sekarang buka overlay normal (hapus ?admin=1).");
   });
 
-  exportBtn?.addEventListener("click", () => {
-    const data = JSON.stringify(CONFIG);
-    navigator.clipboard.writeText(data).then(()=>{
+  exportBtn?.addEventListener("click", async () => {
+    try{
+      await navigator.clipboard.writeText(JSON.stringify(CONFIG));
       alert("Export berhasil: config dicopy ke clipboard.\nSimpan di Notes/WA sebagai backup.");
-    }).catch(()=>{
+    }catch{
       alert("Gagal copy otomatis. Coba browser lain atau copy manual.");
-    });
+    }
   });
 
   importBtn?.addEventListener("click", () => {
@@ -876,9 +840,6 @@ setTimeout(() => {
 
   tabEls.forEach(t => t.addEventListener("click", () => adminSetMode(t.dataset.mode)));
 
-  // ==========================
-  // 4) BOOT
-  // ==========================
   if(isAdmin){
     overlayUI.style.display = "none";
     adminUI.style.display = "block";
