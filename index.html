@@ -3,37 +3,88 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Fun Surprise Box</title>
+<title>Surprise Box - Ramadhan Event</title>
 <style>
   :root{
-    --bg1:#74ebd5;
-    --bg2:#acb6e5;
+    /* Ramadhan Event (simple, festive, not too agamis) */
+    --bg1:#063a2d;         /* deep emerald */
+    --bg2:#0b5b46;         /* emerald */
+    --accent:#f6c453;      /* gold */
+    --accent2:#ffdd8a;     /* soft gold */
     --card:#ffffff;
-    --shadow: 0 10px 22px rgba(0,0,0,.18);
-    --pick: rgba(255,215,0,.9);
-    --open:#ffeaa7;
-    --text:#2d3436;
-    --btn:#ff7675;
-    --btn2:#55efc4;
+    --shadow: 0 12px 26px rgba(0,0,0,.22);
+    --pick: rgba(246,196,83,.95);
+    --open:#fff3cf;
+    --text:#1f2937;
+    --btn:#f6c453;
+    --btnText:#1b1b1b;
+    --muted: rgba(255,255,255,.75);
+    --muted2: rgba(255,255,255,.55);
   }
 
   body{
     margin:0;
-    font-family:'Comic Sans MS', Arial, sans-serif;
-    background:linear-gradient(135deg,var(--bg1),var(--bg2));
+    font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+    background:
+      radial-gradient(1200px 600px at 20% 10%, rgba(246,196,83,.18), transparent 60%),
+      radial-gradient(900px 500px at 85% 25%, rgba(255,221,138,.14), transparent 55%),
+      linear-gradient(135deg,var(--bg1),var(--bg2));
     text-align:center;
     overflow:hidden;
+    color:#fff;
   }
+
+  /* subtle ornaments */
+  .ornaments{
+    position:fixed;
+    inset:0;
+    pointer-events:none;
+    opacity:.55;
+    z-index:0;
+  }
+  .ornaments::before{
+    content:"";
+    position:absolute;
+    inset:-40px;
+    background-image:
+      radial-gradient(circle at 20% 30%, rgba(255,255,255,.10) 0 2px, transparent 3px),
+      radial-gradient(circle at 80% 20%, rgba(255,255,255,.10) 0 2px, transparent 3px),
+      radial-gradient(circle at 35% 70%, rgba(255,255,255,.08) 0 2px, transparent 3px),
+      radial-gradient(circle at 70% 75%, rgba(255,255,255,.08) 0 2px, transparent 3px);
+    background-size: 260px 260px;
+    filter: blur(.2px);
+  }
+  .ornaments::after{
+    content:"";
+    position:absolute;
+    left:-20%;
+    top:-30%;
+    width:140%;
+    height:140%;
+    background:
+      repeating-linear-gradient(45deg, rgba(246,196,83,.08), rgba(246,196,83,.08) 2px, transparent 2px, transparent 18px);
+    transform: rotate(6deg);
+    opacity:.35;
+    mask-image: radial-gradient(circle at 50% 45%, rgba(0,0,0,1), transparent 70%);
+  }
+
+  /* main wrapper to sit above ornaments */
+  #overlayUI, #adminUI{ position:relative; z-index:1; }
+
   h1{
-    margin:16px 0 8px;
-    color:white;
-    text-shadow:2px 2px 6px rgba(0,0,0,.22);
+    margin:16px 0 6px;
+    font-weight:1000;
+    letter-spacing:.6px;
+    text-transform:uppercase;
+    font-size: clamp(20px, 3.5vw, 34px);
+    color:#fff;
+    text-shadow: 0 8px 18px rgba(0,0,0,.35);
   }
   .note{
-    color:white;
+    color:var(--muted);
     font-weight:900;
-    text-shadow:2px 2px 6px rgba(0,0,0,.18);
-    margin-bottom:8px;
+    text-shadow:0 6px 14px rgba(0,0,0,.25);
+    margin-bottom:10px;
   }
 
   .topbar{
@@ -41,40 +92,53 @@
     justify-content:center;
     gap:10px;
     flex-wrap:wrap;
-    padding:6px 12px 10px;
+    padding:8px 12px 14px;
   }
 
   .mode-btn, .ctrl-btn{
-    padding:10px 18px;
+    padding:10px 16px;
     border:none;
-    border-radius:18px;
-    font-size:15px;
+    border-radius:16px;
+    font-size:14px;
     font-weight:1000;
     cursor:pointer;
-    color:white;
-    box-shadow:0 6px 14px rgba(0,0,0,.18);
-    transition:transform .15s ease, filter .15s ease;
+    box-shadow:0 10px 18px rgba(0,0,0,.20);
+    transition:transform .15s ease, filter .15s ease, box-shadow .15s ease;
   }
-  .mode-btn:hover, .ctrl-btn:hover{ transform:translateY(-1px) scale(1.02); filter:brightness(1.03); }
-  .mode-btn.active{ outline:3px solid rgba(255,255,255,.7); }
+  .mode-btn:hover, .ctrl-btn:hover{
+    transform:translateY(-1px) scale(1.02);
+    filter:brightness(1.03);
+    box-shadow:0 14px 22px rgba(0,0,0,.24);
+  }
+  .mode-btn.active{
+    outline:3px solid rgba(246,196,83,.75);
+  }
 
-  .hemat{ background:#2ecc71; }
-  .royal{ background:#3498db; }
-  .tajir{ background:#e84393; }
-  .ctrl-btn{ background:var(--btn); }
-  .ctrl-btn:disabled{ opacity:.55; cursor:not-allowed; transform:none; filter:none; }
+  /* mode buttons (harmonized) */
+  .hemat{ background: rgba(255,255,255,.10); color:#fff; border:1px solid rgba(255,255,255,.18); }
+  .royal{ background: rgba(246,196,83,.22); color:#fff; border:1px solid rgba(246,196,83,.35); }
+  .tajir{ background: rgba(255,221,138,.18); color:#fff; border:1px solid rgba(255,221,138,.28); }
+
+  .ctrl-btn{
+    background: var(--btn);
+    color: var(--btnText);
+    border:1px solid rgba(0,0,0,.12);
+  }
+  .ctrl-btn:disabled{
+    opacity:.55; cursor:not-allowed; transform:none; filter:none; box-shadow:none;
+  }
 
   .grid{
     display:grid;
     grid-template-columns:repeat(5,110px);
     gap:14px;
     justify-content:center;
-    padding:14px 12px 26px;
-    position:relative; /* penting untuk overlay shuffle */
+    padding:10px 12px 26px;
+    position:relative;
   }
 
   .box{
-    background:var(--card);
+    background: rgba(255,255,255,.94);
     border-radius:22px;
     padding:14px 10px;
     cursor:pointer;
@@ -87,19 +151,32 @@
     justify-content:flex-start;
     align-items:center;
     transform: translateZ(0);
+    border:1px solid rgba(0,0,0,.06);
+    overflow:hidden;
+  }
+  /* small festive corner */
+  .box::before{
+    content:"";
+    position:absolute;
+    right:-26px; top:-26px;
+    width:72px; height:72px;
+    background: radial-gradient(circle at 35% 35%, rgba(246,196,83,.65), rgba(246,196,83,.05) 60%, transparent 70%);
+    transform: rotate(25deg);
+    opacity:.8;
+    pointer-events:none;
   }
   .box:hover{ transform:translateY(-2px) scale(1.02); filter:brightness(1.02); }
   .box.disabled{ cursor:not-allowed; }
   .box.disabled:hover{ transform:none; filter:none; }
 
   .num{
-    font-size:20px;
+    font-size:18px;
     font-weight:1000;
     color:var(--text);
     line-height:1;
+    opacity:.9;
   }
 
-  /* hadiah (gambar) */
   .gift{
     margin-top:10px;
     display:none;
@@ -109,7 +186,7 @@
     width:64px;
     height:64px;
     object-fit:contain;
-    filter: drop-shadow(0 6px 10px rgba(0,0,0,.18));
+    filter: drop-shadow(0 8px 12px rgba(0,0,0,.18));
     opacity:0;
     transform: translateY(6px) scale(.98);
   }
@@ -122,13 +199,12 @@
     transform: translateY(6px);
   }
 
-  /* state open */
   .box.revealed{
     background:var(--open);
+    border-color: rgba(246,196,83,.35);
   }
   .box.revealed .gift{ display:block; }
 
-  /* Smooth stagger reveal */
   .box.revealed .giftImg,
   .box.revealed .giftName{
     animation: revealPop .45s cubic-bezier(.2,.85,.2,1) forwards;
@@ -139,16 +215,15 @@
     to{ opacity:1; transform: translateY(0) scale(1); }
   }
 
-  /* highlight picked */
   .box.picked{
-    outline:4px solid rgba(255,215,0,.85);
-    box-shadow: 0 10px 22px rgba(0,0,0,.22), 0 0 0 6px rgba(255,215,0,.18);
+    outline:4px solid rgba(246,196,83,.85);
+    box-shadow: 0 12px 26px rgba(0,0,0,.24), 0 0 0 7px rgba(246,196,83,.18);
   }
   .tag{
     position:absolute;
     top:10px; right:10px;
     background:var(--pick);
-    color:var(--text);
+    color:#1b1b1b;
     font-weight:1000;
     font-size:11px;
     padding:4px 8px;
@@ -161,7 +236,7 @@
   .popup{
     position:fixed;
     inset:0;
-    background:rgba(0,0,0,0.45);
+    background:rgba(0,0,0,0.50);
     display:none;
     justify-content:center;
     align-items:center;
@@ -169,13 +244,14 @@
     z-index:50;
   }
   .popup-content{
-    background:white;
+    background:rgba(255,255,255,.98);
     padding:22px 18px;
     border-radius:26px;
     max-width:520px;
     width:100%;
-    box-shadow:0 18px 40px rgba(0,0,0,.35);
+    box-shadow:0 22px 46px rgba(0,0,0,.40);
     animation: pop .35s ease;
+    border:1px solid rgba(0,0,0,.06);
   }
   @keyframes pop{
     0%{ transform:scale(0.7); opacity:0; }
@@ -183,18 +259,20 @@
   }
   .popup h2{
     margin:0 0 10px;
-    color:var(--btn);
-    font-size:28px;
+    color:#0b5b46;
+    font-size:26px;
+    font-weight:1000;
   }
   .popupPrizeImg{
     width:150px;height:150px;object-fit:contain;
     border-radius:20px;
     box-shadow:0 10px 22px rgba(0,0,0,.18);
     background:#fff;
+    border:1px solid rgba(0,0,0,.06);
   }
   .popupPrizeName{
     margin:12px 0 0;
-    font-size:22px;
+    font-size:20px;
     font-weight:1000;
     color:var(--text);
   }
@@ -202,12 +280,13 @@
     margin-top:16px;
     padding:10px 18px;
     border:none;
-    border-radius:18px;
-    font-size:16px;
+    border-radius:16px;
+    font-size:15px;
     font-weight:1000;
     cursor:pointer;
-    background:var(--btn2);
-    color:var(--text);
+    background: var(--btn);
+    color: var(--btnText);
+    box-shadow:0 10px 18px rgba(0,0,0,.18);
   }
 
   /* ADMIN */
@@ -215,10 +294,11 @@
     width:min(980px, 96vw);
     margin:14px auto 28px;
     text-align:left;
-    background:rgba(255,255,255,.88);
+    background:rgba(255,255,255,.92);
     border-radius:18px;
     padding:14px;
     box-shadow:var(--shadow);
+    border:1px solid rgba(255,255,255,.12);
   }
   .adminHeader{
     display:flex;
@@ -227,8 +307,8 @@
     gap:10px;
     flex-wrap:wrap;
   }
-  .adminHeader h2{ margin:0; color:#111; }
-  .adminHeader .small{ font-size:12px; font-weight:900; color:#333; opacity:.85; }
+  .adminHeader h2{ margin:0; color:#0b5b46; font-weight:1000; }
+  .adminHeader .small{ font-size:12px; font-weight:900; color:#111; opacity:.75; }
   .adminBtns{ display:flex; gap:8px; flex-wrap:wrap; }
   .aBtn{
     border:none;
@@ -239,27 +319,27 @@
     background:#111;
     color:#fff;
   }
-  .aBtn.alt{ background:#3b82f6; }
+  .aBtn.alt{ background:#0b5b46; }
   .aBtn.good{ background:#22c55e; }
-  .aBtn.warn{ background:#ff7675; }
+  .aBtn.warn{ background:#ef4444; }
 
   .tabs{ display:flex; gap:8px; margin-top:12px; flex-wrap:wrap; }
   .tab{
     padding:10px 12px;
     border-radius:14px;
-    border:2px solid rgba(0,0,0,.12);
+    border:2px solid rgba(0,0,0,.10);
     cursor:pointer;
     font-weight:1000;
     background:#fff;
+    color:#0b5b46;
   }
   .tab.active{
-    border-color: rgba(0,0,0,.35);
-    box-shadow:0 6px 14px rgba(0,0,0,.10);
+    border-color: rgba(246,196,83,.75);
+    box-shadow:0 8px 16px rgba(0,0,0,.10);
   }
 
   .rows{ margin-top:12px; display:flex; flex-direction:column; gap:10px; }
 
-  /* ✅ FIX: layout admin biar "Jumlah" jelas dan ga ketutup */
   .row{
     display:grid;
     grid-template-columns: 110px 1fr 320px;
@@ -268,15 +348,16 @@
     padding:10px;
     border-radius:16px;
     background:#fff;
-    border:2px solid rgba(0,0,0,.08);
+    border:2px solid rgba(0,0,0,.06);
   }
 
   .thumb{
     width:110px;height:70px;
     border-radius:14px;
-    background:rgba(0,0,0,.06);
+    background:rgba(0,0,0,.04);
     display:flex;align-items:center;justify-content:center;
     overflow:hidden;
+    border:1px solid rgba(0,0,0,.06);
   }
   .thumb img{ width:100%;height:100%;object-fit:contain; }
 
@@ -284,10 +365,10 @@
     width:100%;
     padding:10px 12px;
     border-radius:14px;
-    border:2px solid rgba(0,0,0,.12);
+    border:2px solid rgba(0,0,0,.10);
     font-weight:900;
   }
-  .mini{ font-size:12px; font-weight:900; opacity:.8; margin-top:6px; }
+  .mini{ font-size:12px; font-weight:900; opacity:.75; margin-top:6px; }
 
   .rightPack{
     display:flex;
@@ -303,21 +384,13 @@
     gap:4px;
     min-width:120px;
   }
-  .countLabel{
-    font-size:12px;
-    font-weight:1000;
-    opacity:.85;
-  }
-  .countHint{
-    font-size:12px;
-    font-weight:1000;
-    opacity:.75;
-  }
+  .countLabel{ font-size:12px; font-weight:1000; opacity:.85; }
+  .countHint{ font-size:12px; font-weight:1000; opacity:.75; }
   .count{
     width:120px;
     padding:10px 12px;
     border-radius:14px;
-    border:2px solid rgba(0,0,0,.12);
+    border:2px solid rgba(0,0,0,.10);
     font-weight:1000;
     text-align:center;
   }
@@ -336,13 +409,11 @@
     font-size:12px;
     font-weight:900;
     color:#111;
-    opacity:.85;
-    line-height:1.4;
+    opacity:.82;
+    line-height:1.45;
   }
 
-  /* =========================
-     ✅ SHUFFLE GIMMICK (NO SPOILER)
-     ========================= */
+  /* SHUFFLE (keep your no-spoiler gimmick) */
   .shuffling .box{
     animation: shuffleShake .42s ease-in-out infinite;
     filter: blur(.2px) brightness(1.02);
@@ -358,26 +429,23 @@
   .shuffleOverlay{
     position:absolute;
     inset:0;
-    background:rgba(255,255,255,.68);
+    background:rgba(255,255,255,.78);
     display:flex;
     align-items:center;
     justify-content:center;
     gap:10px;
-    font-size:30px;
+    font-size:28px;
     font-weight:1000;
-    color:#111;
-    backdrop-filter: blur(4px);
+    color:#0b5b46;
+    backdrop-filter: blur(6px);
     z-index:10;
     border-radius:18px;
+    border:1px solid rgba(0,0,0,.06);
   }
-  .dots{
-    display:inline-flex;
-    gap:6px;
-    align-items:center;
-  }
+  .dots{ display:inline-flex; gap:6px; align-items:center; }
   .dot{
     width:10px;height:10px;border-radius:999px;
-    background:#111;
+    background:#0b5b46;
     opacity:.25;
     animation: dotPulse 1s infinite;
   }
@@ -387,13 +455,22 @@
     0%,100%{ opacity:.25; transform:translateY(0); }
     50%{ opacity:.9; transform:translateY(-4px); }
   }
+
+  /* responsive */
+  @media (max-width: 640px){
+    .grid{ grid-template-columns:repeat(3,110px); }
+    .row{ grid-template-columns: 90px 1fr; }
+    .rightPack{ justify-content:flex-start; }
+  }
 </style>
 </head>
 <body>
 
+<div class="ornaments"></div>
+
 <!-- OVERLAY UI -->
 <div id="overlayUI">
-  <h1>🎁 FUN SURPRISE BOX 🎁</h1>
+  <h1>SURPRISE BOX RAMADHAN EVENT</h1>
   <div class="note" id="modeNote">Mode: HEMAT (1R)</div>
 
   <div class="topbar">
@@ -411,7 +488,7 @@
 <!-- POPUP -->
 <div class="popup" id="popup">
   <div class="popup-content">
-    <h2>🎉 CONGRATS! 🎉</h2>
+    <h2>Hadiah Kamu</h2>
     <img id="popupImg" class="popupPrizeImg" alt="">
     <div id="popupName" class="popupPrizeName"></div>
     <button class="close-btn" onclick="closePopup()">OK</button>
@@ -424,7 +501,7 @@
     <div class="adminHeader">
       <div>
         <h2>Admin Hadiah (Gambar + Rarity)</h2>
-        <div class="small">Atur langsung di website. Tersimpan di browser PC kamu (LocalStorage).</div>
+        <div class="small">Tersimpan di browser PC kamu (LocalStorage).</div>
       </div>
       <div class="adminBtns">
         <button class="aBtn alt" id="addItemBtn">+ Tambah Hadiah</button>
@@ -508,16 +585,13 @@
   const shuffleBtn = document.getElementById("shuffleBtn");
 
   let mode = "hemat";
-  let slots = [];           // length 15, each: {name, img}
+  let slots = [];
   let pickedIndex = null;
   let isRevealing = false;
   let isShuffling = false;
 
-  // ✅ Ubah ini kalau mau lebih pelan/cepat
-  const STAGGER_MS = 80;    // 70-110 biasanya enak
+  const STAGGER_MS = 80;
   const POPUP_DELAY_MS = 260;
-
-  // ✅ Durasi gimmick shuffle (tidak bocor hadiah)
   const SHUFFLE_ANIM_MS = 1200;
 
   function fisherYatesShuffle(arr){
@@ -537,11 +611,8 @@
         expanded.push({ name: it.name || "Hadiah", img: it.img || null });
       }
     }
-
-    // safety: harus 15
     while(expanded.length < 15) expanded.push({ name:"?", img:null });
     while(expanded.length > 15) expanded.pop();
-
     return fisherYatesShuffle(expanded);
   }
 
@@ -554,33 +625,25 @@
     render(false);
   }
 
-  // ✅ SHUFFLE GIMMICK (NO SPOILER)
   function shuffleOnly(){
     if(isRevealing || pickedIndex !== null || isShuffling) return;
 
     isShuffling = true;
     enableControls(false);
 
-    // overlay "SHUFFLING..."
     const overlay = document.createElement("div");
     overlay.className = "shuffleOverlay";
-    overlay.innerHTML = `🔀 SHUFFLING <span class="dots"><span class="dot"></span><span class="dot"></span><span class="dot"></span></span>`;
+    overlay.innerHTML = `SHUFFLING <span class="dots"><span class="dot"></span><span class="dot"></span><span class="dot"></span></span>`;
     grid.appendChild(overlay);
 
-    // shake effect
     grid.classList.add("shuffling");
-
-    // selama shuffle, hadiah TETAP tertutup (render(false))
     render(false);
 
     setTimeout(() => {
-      // shuffle beneran di backend
       slots = fisherYatesShuffle(slots);
-
       grid.classList.remove("shuffling");
       overlay.remove();
-
-      render(false); // tetap tidak bocor hadiah
+      render(false);
       enableControls(true);
       isShuffling = false;
     }, SHUFFLE_ANIM_MS);
@@ -600,10 +663,8 @@
     isRevealing = true;
     enableControls(false);
 
-    // reveal bertahap via delay CSS
     render(true);
 
-    // popup setelah semua kotak “selesai” reveal
     const totalTime = (15 * STAGGER_MS) + 520;
     setTimeout(() => {
       const prize = slots[pickedIndex];
@@ -623,13 +684,11 @@
       if(reveal) div.classList.add("revealed");
       if(pickedIndex === i) div.classList.add("picked");
 
-      // stagger delay (1 → 15)
       div.style.setProperty("--d", (i * STAGGER_MS) + "ms");
 
       const prize = slots[i];
       const imgSrc = prize?.img || makeEmojiDataUrl("🎁");
 
-      // ⚠️ Jangan bocor: saat reveal=false, gift tetap hidden karena .gift display:none
       div.innerHTML = `
         <div class="tag">PICK</div>
         <div class="num">${i+1}</div>
@@ -659,7 +718,8 @@
   function makeEmojiDataUrl(emoji){
     const svg =
       `<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256">
-        <rect width="100%" height="100%" rx="40" ry="40" fill="white"/>
+        <rect width="100%" height="100%" rx="44" ry="44" fill="white"/>
+        <circle cx="210" cy="46" r="18" fill="#f6c453" opacity=".65"/>
         <text x="50%" y="58%" font-size="140" text-anchor="middle" dominant-baseline="middle">${emoji}</text>
       </svg>`;
     return "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg);
@@ -728,7 +788,6 @@
       del.className = "del";
       del.textContent = "Hapus";
 
-      // ✅ Rarity (Jumlah) + persen
       const countInput = document.createElement("input");
       countInput.className = "count";
       countInput.type = "number";
@@ -759,7 +818,6 @@
       rightPack.appendChild(file);
       rightPack.appendChild(del);
 
-      // events
       nameInput.addEventListener("input", () => {
         CONFIG[adminMode][idx].name = nameInput.value;
       });
@@ -773,7 +831,6 @@
       file.addEventListener("change", async () => {
         const f = file.files?.[0];
         if(!f) return;
-
         const dataUrl = await fileToDataUrl(f);
         CONFIG[adminMode][idx].img = dataUrl;
         img.src = dataUrl;
@@ -790,7 +847,6 @@
       rowsEl.appendChild(row);
     });
 
-    // total count info
     const total = (CONFIG[adminMode] || []).reduce((s,it)=>s + (parseInt(it.count||0,10)||0), 0);
     const info = document.createElement("div");
     info.className = "help";
