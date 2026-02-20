@@ -217,42 +217,6 @@
     box-shadow: 0 14px 30px rgba(0,0,0,.28), 0 0 0 8px rgba(255,215,0,.22), 0 0 28px rgba(255,215,0,.55);
   }
 
-  /* History panel */
-  .history{
-  position:static; /* ❌ hapus absolute */
-  margin: 10px auto 0;
-  background:rgba(255,255,255,.85);
-  border-radius:16px;
-  padding:10px 12px;
-  box-shadow:0 10px 22px rgba(0,0,0,.16);
-  text-align:left;
-  width:min(500px, 90vw);
-}
-  .history h3{
-    margin:0 0 6px;
-    font-size:12px;
-    font-weight:1000;
-    color:#111;
-    opacity:.9;
-  }
-  .history .item{
-    font-size:12px;
-    font-weight:900;
-    color:#111;
-    opacity:.9;
-    display:flex;
-    gap:8px;
-    align-items:center;
-    margin:4px 0;
-  }
-  .pill{
-    background:var(--panel2);
-    padding:2px 8px;
-    border-radius:999px;
-    font-size:11px;
-    font-weight:1000;
-  }
-
   /* POPUP */
   .popup{
     position:fixed;
@@ -328,7 +292,7 @@
   }
   .popup-content.secret-mode .secretBadge{ display:inline-block; }
 
-  /* ADMIN (tetap) */
+  /* ADMIN */
   .adminWrap{
     width:min(980px, 96vw);
     margin:14px auto 28px;
@@ -456,15 +420,11 @@
     opacity:.85;
     line-height:1.4;
   }
-  body.modal-open .history{
-  opacity:.35;
-  filter:blur(1px);
-}
+
 </style>
 </head>
 <body>
 
-<!-- Optional sounds: taruh win.mp3 / secret.mp3 sebelah file HTML. Kalau gak ada, aman. -->
 <audio id="sfxWin" src="win.mp3" preload="auto"></audio>
 <audio id="sfxSecret" src="secret.mp3" preload="auto"></audio>
 
@@ -480,18 +440,11 @@
 
     <button class="ctrl-btn" id="resetBtn">Reset</button>
     <button class="ctrl-btn" id="shuffleBtn">Shuffle</button>
-    <button class="ctrl-btn" id="randomBtn">Random Pick</button>
   </div>
 
-    <div class="gridWrap">
+  <div class="gridWrap">
     <div class="grid" id="grid"></div>
   </div>
-
-  <div class="history" id="historyPanel">
-    <h3>LAST WIN</h3>
-    <div id="historyList"></div>
-  </div>
-
 </div>
 
 <!-- POPUP -->
@@ -565,7 +518,6 @@
 
   const PRICE = { hemat:"1R", royal:"5R", tajir:"10R" };
   const STORAGE_KEY = "fun_box_config_v4_hype";
-  const HISTORY_KEY = "fun_box_history_v1";
 
   function loadConfig(){
     try{
@@ -580,18 +532,6 @@
     localStorage.setItem(STORAGE_KEY, JSON.stringify(cfg));
   }
 
-  function loadHistory(){
-    try{
-      const raw = localStorage.getItem(HISTORY_KEY);
-      if(!raw) return [];
-      const arr = JSON.parse(raw);
-      return Array.isArray(arr) ? arr : [];
-    }catch{ return []; }
-  }
-  function saveHistory(arr){
-    localStorage.setItem(HISTORY_KEY, JSON.stringify(arr.slice(0,3)));
-  }
-
   let CONFIG = loadConfig();
 
   // ==========================
@@ -604,7 +544,6 @@
   const popupName = document.getElementById("popupName");
   const popupOkBtn = document.getElementById("popupOkBtn");
   const modeNote = document.getElementById("modeNote");
-  const historyList = document.getElementById("historyList");
 
   const sfxWin = document.getElementById("sfxWin");
   const sfxSecret = document.getElementById("sfxSecret");
@@ -612,7 +551,6 @@
   const modeBtns = document.querySelectorAll(".mode-btn");
   const resetBtn = document.getElementById("resetBtn");
   const shuffleBtn = document.getElementById("shuffleBtn");
-  const randomBtn = document.getElementById("randomBtn");
 
   let mode = "hemat";
   let slots = [];
@@ -656,7 +594,6 @@
   function enableControls(enabled){
     resetBtn.disabled = !enabled;
     shuffleBtn.disabled = !enabled;
-    randomBtn.disabled = !enabled;
     modeBtns.forEach(b => b.disabled = !enabled);
   }
 
@@ -704,7 +641,7 @@
       clearInterval(flashTimer);
       grid.querySelectorAll(".box").forEach(b => b.classList.remove("flash"));
 
-      // true shuffle (tetap random beneran)
+      // true shuffle
       slots = fisherYatesShuffle(slots);
 
       grid.classList.remove("shuffling");
@@ -714,12 +651,6 @@
       enableControls(true);
       isShuffling = false;
     }, SHUFFLE_ANIM_MS);
-  }
-
-  function randomPick(){
-    if(isRevealing || pickedIndex !== null || isShuffling) return;
-    const rand = Math.floor(Math.random()*15);
-    pick(rand);
   }
 
   function openPopup(prize, meta){
@@ -737,17 +668,6 @@
       a.currentTime = 0;
       a.play();
     }catch{}
-
-    const hist = loadHistory();
-    const entry = {
-      t: Date.now(),
-      mode,
-      pick: meta?.pickNumber ?? (pickedIndex+1),
-      name: prize.name || "Hadiah"
-    };
-    const next = [entry, ...hist].slice(0,3);
-    saveHistory(next);
-    renderHistory();
   }
 
   function closePopup(){
@@ -808,18 +728,6 @@
     }
   }
 
-  function renderHistory(){
-    const hist = loadHistory();
-    if(!hist.length){
-      historyList.innerHTML = `<div class="item"><span class="pill">—</span>Belum ada</div>`;
-      return;
-    }
-    historyList.innerHTML = hist.map(h => {
-      const m = String(h.mode || "").toUpperCase();
-      return `<div class="item"><span class="pill">#${h.pick}</span>${escapeHtml(h.name)} <span style="opacity:.65;font-weight:1000;">(${m})</span></div>`;
-    }).join("");
-  }
-
   popupOkBtn.addEventListener("click", closePopup);
   popup.addEventListener("click", (e) => { if(e.target === popup) closePopup(); });
   window.addEventListener("keydown", (e) => { if(e.key === "Escape" && popup.style.display === "flex") closePopup(); });
@@ -849,7 +757,7 @@
   }
 
   // ==========================
-  // 3) ADMIN UI (tetap)
+  // 3) ADMIN UI
   // ==========================
   const isAdmin = new URLSearchParams(location.search).get("admin") === "1";
   const overlayUI = document.getElementById("overlayUI");
@@ -1052,13 +960,9 @@
     modeBtns.forEach(btn => btn.addEventListener("click", () => setMode(btn.dataset.mode)));
     resetBtn.addEventListener("click", resetRound);
     shuffleBtn.addEventListener("click", shuffleOnly);
-    randomBtn.addEventListener("click", randomPick);
 
-    renderHistory();
     resetRound();
   }
 </script>
 </body>
 </html>
-
-
