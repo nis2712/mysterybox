@@ -219,17 +219,15 @@
 
   /* History panel */
   .history{
-    position:absolute;
-    left:10px;
-    top:10px;
-    background:var(--panel);
-    border-radius:16px;
-    padding:10px 12px;
-    box-shadow:0 10px 22px rgba(0,0,0,.16);
-    text-align:left;
-    width: min(220px, 48vw);
-    backdrop-filter: blur(6px);
-  }
+  position:static; /* ❌ hapus absolute */
+  margin: 10px auto 0;
+  background:rgba(255,255,255,.85);
+  border-radius:16px;
+  padding:10px 12px;
+  box-shadow:0 10px 22px rgba(0,0,0,.16);
+  text-align:left;
+  width:min(500px, 90vw);
+}
   .history h3{
     margin:0 0 6px;
     font-size:12px;
@@ -458,6 +456,10 @@
     opacity:.85;
     line-height:1.4;
   }
+  body.modal-open .history{
+  opacity:.35;
+  filter:blur(1px);
+}
 </style>
 </head>
 <body>
@@ -482,13 +484,12 @@
   </div>
 
   <div class="gridWrap">
+    <div class="grid" id="grid"></div>
+    </div>
+  
     <div class="history" id="historyPanel">
       <h3>LAST WIN</h3>
       <div id="historyList"></div>
-    </div>
-
-    <div class="grid" id="grid"></div>
-  </div>
 </div>
 
 <!-- POPUP -->
@@ -1057,3 +1058,4 @@
 </script>
 </body>
 </html>
+
