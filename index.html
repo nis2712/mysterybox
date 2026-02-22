@@ -66,6 +66,7 @@
   .hemat{ background:#2ecc71; }
   .royal{ background:#3498db; }
   .tajir{ background:#e84393; }
+  .premini{ background:#f39c12; } /* ✅ Premium Mini */
   .ctrl-btn{ background:var(--btn); }
   .ctrl-btn:disabled{ opacity:.55; cursor:not-allowed; transform:none; filter:none; }
 
@@ -437,6 +438,7 @@
     <button class="mode-btn hemat active" data-mode="hemat">HEMAT</button>
     <button class="mode-btn royal" data-mode="royal">ROYAL</button>
     <button class="mode-btn tajir" data-mode="tajir">TAJIR</button>
+    <button class="mode-btn premini" data-mode="premini">PREMINI</button>
 
     <button class="ctrl-btn" id="resetBtn">Reset</button>
     <button class="ctrl-btn" id="shuffleBtn">Shuffle</button>
@@ -479,6 +481,7 @@
       <div class="tab active" data-mode="hemat">HEMAT</div>
       <div class="tab" data-mode="royal">ROYAL</div>
       <div class="tab" data-mode="tajir">TAJIR</div>
+      <div class="tab" data-mode="premini">PREMINI</div>
     </div>
 
     <div class="help">
@@ -513,11 +516,17 @@
       { name:"Gem 30", count:5, img:null },
       { name:"Mega Box", count:2, img:null },
       { name:"SECRET", count:1, img:null }
+    ],
+    premini: [ /* ✅ Premium Mini (after Tajir) */
+      { name:"Coin 150", count:6, img:null },
+      { name:"Gem 5", count:5, img:null },
+      { name:"Mini Pack", count:3, img:null },
+      { name:"Lucky Mini", count:1, img:null }
     ]
   };
 
-  const PRICE = { hemat:"1R", royal:"5R", tajir:"10R" };
-  const STORAGE_KEY = "fun_box_config_v4_hype";
+  const PRICE = { hemat:"1R", royal:"5R", tajir:"10R", premini:"20R" }; // ✅ premini 20R
+  const STORAGE_KEY = "fun_box_config_v5_hype";
 
   function loadConfig(){
     try{
@@ -612,7 +621,7 @@
     if(isShuffling || isRevealing) return;
     mode = newMode;
     modeBtns.forEach(b => b.classList.toggle("active", b.dataset.mode === newMode));
-    modeNote.textContent = `Mode: ${newMode.toUpperCase()} (${PRICE[newMode]})`;
+    modeNote.textContent = `Mode: ${newMode.toUpperCase()} (${PRICE[newMode] || "-"})`;
     resetRound();
   }
 
@@ -653,7 +662,7 @@
     }, SHUFFLE_ANIM_MS);
   }
 
-  function openPopup(prize, meta){
+  function openPopup(prize){
     const isSecret = String(prize?.name || "").toLowerCase().includes("secret");
     popupContent.classList.toggle("secret-mode", isSecret);
 
@@ -694,7 +703,7 @@
       if(boxes[pickedIndex]) boxes[pickedIndex].classList.add("final-focus");
 
       setTimeout(() => {
-        openPopup(slots[pickedIndex], { pickNumber: pickedIndex+1 });
+        openPopup(slots[pickedIndex]);
         enableControls(true);
       }, FOCUS_DELAY_MS);
 
@@ -889,7 +898,7 @@
   }
 
   function validateAll(){
-    const modes = ["hemat","royal","tajir"];
+    const modes = ["hemat","royal","tajir","premini"];
     const errs = [];
     for(const m of modes){
       const total = (CONFIG[m]||[]).reduce((s,it)=>s + (parseInt(it.count||0,10)||0), 0);
