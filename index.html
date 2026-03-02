@@ -42,11 +42,18 @@
   }
 
   .topbar{
-    display:flex;
-    justify-content:center;
-    gap:10px;
-    flex-wrap:wrap;
-    padding:6px 12px 10px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:10px;
+  padding:6px 12px 10px;
+  }
+  
+  .toprow, .botrow{
+  display:flex;
+  justify-content:center;
+  gap:10px;
+  flex-wrap:wrap;
   }
 
   .mode-btn, .ctrl-btn{
@@ -433,16 +440,20 @@
   <div class="note" id="modeNote">Mode: HEMAT (3R)</div>
 
   <div class="topbar">
+  <div class="toprow">
     <button class="mode-btn hemat active" data-mode="hemat">HEMAT</button>
     <button class="mode-btn royal" data-mode="royal">ROYAL</button>
     <button class="mode-btn tajir" data-mode="tajir">TAJIR</button>
     <button class="mode-btn premini" data-mode="premini">PREMINI</button>
+  </div>
+
+  <div class="botrow">
     <button class="mode-btn guards" data-mode="guards">GUARDS</button>
     <button class="mode-btn infi" data-mode="infi">INFI</button>
-
     <button class="ctrl-btn" id="resetBtn">Reset</button>
     <button class="ctrl-btn" id="shuffleBtn">Shuffle</button>
   </div>
+</div>
 
   <div class="gridWrap">
     <div class="grid" id="grid"></div>
@@ -1010,5 +1021,6 @@
 </script>
 </body>
 </html>
+
 
 
