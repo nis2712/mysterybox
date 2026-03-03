@@ -42,18 +42,17 @@
   }
 
   .topbar{
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  gap:10px;
-  padding:6px 12px 10px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:10px;
+    padding:6px 12px 10px;
   }
-  
   .toprow, .botrow{
-  display:flex;
-  justify-content:center;
-  gap:10px;
-  flex-wrap:wrap;
+    display:flex;
+    justify-content:center;
+    gap:10px;
+    flex-wrap:wrap;
   }
 
   .mode-btn, .ctrl-btn{
@@ -84,6 +83,24 @@
     width: min(760px, 96vw);
     margin: 0 auto;
     position:relative;
+    overflow:hidden;
+    border-radius:18px;
+  }
+
+  /* ✅ BACKGROUND GRID (bisa diupload dari admin) */
+  .gridWrap::before{
+    content:"";
+    position:absolute;
+    inset:0;
+    background-image: var(--grid-bg, none);
+    background-size: cover;
+    background-position: center;
+    background-repeat:no-repeat;
+    opacity: var(--grid-bg-opacity, .35);
+    filter: blur(var(--grid-bg-blur, 0px));
+    transform: scale(1.04);
+    z-index:0;
+    pointer-events:none;
   }
 
   /* ✅ grid kolom dinamis pakai CSS variable */
@@ -95,6 +112,7 @@
     justify-content:center;
     padding:14px 12px 26px;
     position:relative;
+    z-index:1; /* di atas background */
   }
 
   .box{
@@ -427,6 +445,27 @@
     opacity:.85;
     line-height:1.4;
   }
+
+  /* layout kecil untuk kontrol bg */
+  .bgTools{
+    margin-top:12px;
+    padding:12px;
+    border-radius:14px;
+    background:rgba(255,255,255,.9);
+    border:2px solid rgba(0,0,0,.08);
+  }
+  .bgRow{
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+    align-items:center;
+    margin-top:8px;
+  }
+  .bgLabel{
+    font-weight:900;
+    font-size:12px;
+    color:#111;
+  }
 </style>
 </head>
 <body>
@@ -440,20 +479,20 @@
   <div class="note" id="modeNote">Mode: HEMAT (3R)</div>
 
   <div class="topbar">
-  <div class="toprow">
-    <button class="mode-btn hemat active" data-mode="hemat">HEMAT</button>
-    <button class="mode-btn royal" data-mode="royal">ROYAL</button>
-    <button class="mode-btn tajir" data-mode="tajir">TAJIR</button>
-    <button class="mode-btn premini" data-mode="premini">PREMINI</button>
-  </div>
+    <div class="toprow">
+      <button class="mode-btn hemat active" data-mode="hemat">HEMAT</button>
+      <button class="mode-btn royal" data-mode="royal">ROYAL</button>
+      <button class="mode-btn tajir" data-mode="tajir">TAJIR</button>
+      <button class="mode-btn premini" data-mode="premini">PREMINI</button>
+    </div>
 
-  <div class="botrow">
-    <button class="mode-btn guards" data-mode="guards">GUARDS</button>
-    <button class="mode-btn infi" data-mode="infi">INFI</button>
-    <button class="ctrl-btn" id="resetBtn">Reset</button>
-    <button class="ctrl-btn" id="shuffleBtn">Shuffle</button>
+    <div class="botrow">
+      <button class="mode-btn guards" data-mode="guards">GUARDS</button>
+      <button class="mode-btn infi" data-mode="infi">INFI</button>
+      <button class="ctrl-btn" id="resetBtn">Reset</button>
+      <button class="ctrl-btn" id="shuffleBtn">Shuffle</button>
+    </div>
   </div>
-</div>
 
   <div class="gridWrap">
     <div class="grid" id="grid"></div>
@@ -501,6 +540,26 @@
       • Set <b>Jumlah (rarity)</b> = berapa kotak yang berisi hadiah ini.<br>
       • Total: HEMAT/ROYAL/TAJIR/PREMINI = <b>15</b>, GUARDS = <b>6</b>, INFI = <b>4</b>.<br>
       • Klik <b>Save</b>, lalu buka overlay normal (tanpa <b>?admin=1</b>).
+    </div>
+
+    <!-- ✅ TOOLS BACKGROUND GRID -->
+    <div class="bgTools">
+      <div style="font-weight:1000;">Background Grid (opsional)</div>
+      <div class="mini" style="margin-top:4px;">Upload gambar untuk background area box (hanya belakang grid).</div>
+
+      <div class="bgRow">
+        <input type="file" id="bgUpload" accept="image/*">
+        <button class="aBtn" id="bgRemove" type="button">Hapus Background</button>
+      </div>
+
+      <div class="bgRow">
+        <label class="bgLabel">Opacity
+          <input id="bgOpacity" type="range" min="0" max="1" step="0.05" value="0.35">
+        </label>
+        <label class="bgLabel">Blur
+          <input id="bgBlur" type="range" min="0" max="10" step="1" value="0">
+        </label>
+      </div>
     </div>
 
     <div class="rows" id="rows"></div>
@@ -551,6 +610,9 @@
   const PRICE = { hemat:"1R", royal:"5R", tajir:"10R", premini:"20R", guards:"15R", infi:"30R" };
   const STORAGE_KEY = "fun_box_config_v7_hype";
 
+  // ✅ BACKGROUND STORAGE
+  const BG_KEY = "fun_box_grid_bg_v1";
+
   // ✅ target jumlah box per mode
   const MODE_TOTAL = { hemat:15, royal:15, tajir:15, premini:15, guards:6, infi:4 };
 
@@ -567,7 +629,34 @@
     localStorage.setItem(STORAGE_KEY, JSON.stringify(cfg));
   }
 
+  function loadBg(){
+    try{
+      const raw = localStorage.getItem(BG_KEY);
+      if(!raw) return { img:null, opacity:0.35, blur:0 };
+      const v = JSON.parse(raw);
+      return {
+        img: v?.img ?? null,
+        opacity: (typeof v?.opacity === "number" ? v.opacity : 0.35),
+        blur: (typeof v?.blur === "number" ? v.blur : 0)
+      };
+    }catch(e){
+      return { img:null, opacity:0.35, blur:0 };
+    }
+  }
+  function saveBg(bg){
+    localStorage.setItem(BG_KEY, JSON.stringify(bg));
+  }
+
   let CONFIG = loadConfig();
+  let BG = loadBg();
+
+  function applyBg(){
+    const wrap = document.querySelector(".gridWrap");
+    if(!wrap) return;
+    wrap.style.setProperty("--grid-bg", BG.img ? `url("${BG.img}")` : "none");
+    wrap.style.setProperty("--grid-bg-opacity", String(BG.opacity ?? 0.35));
+    wrap.style.setProperty("--grid-bg-blur", (BG.blur ?? 0) + "px");
+  }
 
   // ==========================
   // 2) OVERLAY LOGIC
@@ -611,10 +700,8 @@
   }
 
   function getColsForCount(n){
-    // ✅ sesuai request:
     if(n === 6) return 3; // 3 atas 3 bawah
     if(n === 4) return 2; // 2 atas 2 bawah
-    // default mode besar
     return 5; // 15 => 5 kolom
   }
 
@@ -655,7 +742,8 @@
 
     grid.classList.remove("dim-other");
     slots = buildSlotsFromConfig(mode);
-    applyGridCols();     // ✅ update kolom sesuai jumlah box
+    applyGridCols();
+    applyBg(); // ✅ apply background grid tiap reset
     render(false);
   }
 
@@ -821,6 +909,11 @@
   const importBtn = document.getElementById("importBtn");
   const resetDefaultBtn = document.getElementById("resetDefaultBtn");
 
+  const bgUpload = document.getElementById("bgUpload");
+  const bgRemove = document.getElementById("bgRemove");
+  const bgOpacity = document.getElementById("bgOpacity");
+  const bgBlur = document.getElementById("bgBlur");
+
   let adminMode = "hemat";
 
   function fileToDataUrl(file){
@@ -831,6 +924,39 @@
       r.readAsDataURL(file);
     });
   }
+
+  // ✅ set slider awal sesuai data bg
+  if(bgOpacity) bgOpacity.value = String(BG.opacity ?? 0.35);
+  if(bgBlur) bgBlur.value = String(BG.blur ?? 0);
+
+  bgUpload?.addEventListener("change", async () => {
+    const f = bgUpload.files?.[0];
+    if(!f) return;
+    const dataUrl = await fileToDataUrl(f);
+    BG.img = dataUrl;
+    saveBg(BG);
+    applyBg();
+    alert("Background grid tersimpan!");
+  });
+
+  bgRemove?.addEventListener("click", () => {
+    BG.img = null;
+    saveBg(BG);
+    applyBg();
+    alert("Background dihapus.");
+  });
+
+  bgOpacity?.addEventListener("input", () => {
+    BG.opacity = parseFloat(bgOpacity.value);
+    saveBg(BG);
+    applyBg();
+  });
+
+  bgBlur?.addEventListener("input", () => {
+    BG.blur = parseInt(bgBlur.value || "0", 10);
+    saveBg(BG);
+    applyBg();
+  });
 
   function adminSetMode(m){
     adminMode = m;
@@ -1007,6 +1133,7 @@
   if(isAdmin){
     overlayUI.style.display = "none";
     adminUI.style.display = "block";
+    applyBg();   // ✅ biar keliatan juga (walau admin)
     adminRender();
   }else{
     overlayUI.style.display = "block";
@@ -1016,11 +1143,9 @@
     resetBtn.addEventListener("click", resetRound);
     shuffleBtn.addEventListener("click", shuffleOnly);
 
+    applyBg(); // ✅ apply saat start
     resetRound();
   }
 </script>
 </body>
 </html>
-
-
-
