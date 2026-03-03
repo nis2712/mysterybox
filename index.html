@@ -15,17 +15,31 @@
     --text:#2d3436;
     --btn:#ff7675;
     --btn2:#55efc4;
-    --panel: rgba(255,255,255,.78);
-    --panel2: rgba(255,255,255,.58);
   }
 
+  /* ✅ WEBSITE BACKGROUND LAYER (custom dari admin) */
   body{
     margin:0;
     font-family:'Comic Sans MS', Arial, sans-serif;
-    background:linear-gradient(135deg,var(--bg1),var(--bg2));
     text-align:center;
     overflow-x:hidden;
     overflow-y:auto;
+    position:relative;
+    background:linear-gradient(135deg,var(--bg1),var(--bg2));
+  }
+  body::before{
+    content:"";
+    position:fixed;
+    inset:0;
+    background-image: var(--site-bg, none);
+    background-size: cover;
+    background-position: center;
+    background-repeat:no-repeat;
+    opacity: var(--site-bg-opacity, .65);
+    filter: blur(var(--site-bg-blur, 0px));
+    transform: scale(1.05);
+    z-index:-1;
+    pointer-events:none;
   }
   body.modal-open{ overflow:hidden; }
 
@@ -48,7 +62,6 @@
     gap:10px;
     padding:6px 12px 10px;
   }
-
   .toprow, .botrow{
     display:flex;
     justify-content:center;
@@ -84,11 +97,11 @@
     width: min(760px, 96vw);
     margin: 0 auto;
     position:relative;
-    overflow:hidden;          /* ✅ penting biar ::before rapih */
-    border-radius:18px;       /* ✅ biar background ikut rounded */
+    overflow:hidden;
+    border-radius:18px;
   }
 
-  /* ✅ background upload (gridWrap) */
+  /* ✅ (BONUS) BACKGROUND GRID (opsional) */
   .gridWrap::before{
     content:"";
     position:absolute;
@@ -97,7 +110,7 @@
     background-size: cover;
     background-position: center;
     background-repeat:no-repeat;
-    opacity: var(--grid-bg-opacity, .6);
+    opacity: var(--grid-bg-opacity, .60);
     filter: blur(var(--grid-bg-blur, 0px));
     transform: scale(1.05);
     z-index:0;
@@ -112,7 +125,7 @@
     justify-content:center;
     padding:14px 12px 26px;
     position:relative;
-    z-index:1; /* ✅ konten di atas background */
+    z-index:1;
   }
 
   .box{
@@ -160,16 +173,13 @@
 
   .box.revealed{ background:var(--open); }
   .box.revealed .gift{ display:block; }
-
   .box.revealed .giftImg,
   .box.revealed .giftName{
     animation: revealPop .45s cubic-bezier(.2,.85,.2,1) forwards;
     animation-delay: var(--d);
     will-change: transform, opacity;
   }
-  @keyframes revealPop{
-    to{ opacity:1; transform: translateY(0) scale(1); }
-  }
+  @keyframes revealPop{ to{ opacity:1; transform: translateY(0) scale(1); } }
 
   .box.picked{
     outline:4px solid rgba(255,215,0,.85);
@@ -269,11 +279,7 @@
     0%{ transform:scale(0.7); opacity:0; }
     100%{ transform:scale(1); opacity:1; }
   }
-  .popup h2{
-    margin:0 0 10px;
-    color:var(--btn);
-    font-size:28px;
-  }
+  .popup h2{ margin:0 0 10px; color:var(--btn); font-size:28px; }
   .popupPrizeImg{
     width:150px;height:150px;object-fit:contain;
     border-radius:20px;
@@ -297,7 +303,6 @@
     background:var(--btn2);
     color:var(--text);
   }
-
   .popup-content.secret-mode{
     animation: secretPulse 1.1s ease-in-out infinite alternate;
   }
@@ -551,32 +556,57 @@
     <div class="help">
       • Set <b>Jumlah (rarity)</b> = berapa kotak yang berisi hadiah ini.<br>
       • Total: HEMAT/ROYAL/TAJIR/PREMINI = <b>15</b>, GUARDS = <b>6</b>, INFI = <b>4</b>.<br>
-      • Background grid di bawah ini berlaku untuk semua mode (tersimpan di browser).<br>
       • Klik <b>Save</b>, lalu buka overlay normal (tanpa <b>?admin=1</b>).
     </div>
 
-    <!-- ✅ Background setting -->
+    <!-- ✅ WEBSITE BG -->
     <div class="bgPanel">
-      <h3>Background Grid (Upload)</h3>
+      <h3>Background WEBSITE (Upload)</h3>
       <div class="bgRow">
-        <div class="bgThumb"><img id="bgPreview" alt=""></div>
+        <div class="bgThumb"><img id="siteBgPreview" alt=""></div>
 
         <div>
-          <div class="mini" style="margin:0 0 6px;">Upload gambar background untuk area kotak.</div>
-          <input id="bgUpload" type="file" accept="image/*" />
-          <button class="aBtn warn" id="bgClearBtn" style="margin-left:8px;">Hapus BG</button>
+          <div class="mini" style="margin:0 0 6px;">Upload gambar untuk background halaman (biru).</div>
+          <input id="siteBgUpload" type="file" accept="image/*" />
+          <button class="aBtn warn" id="siteBgClearBtn" style="margin-left:8px;">Hapus BG</button>
         </div>
 
         <div class="range">
           Opacity
-          <input id="bgOpacity" type="range" min="0" max="100" value="60">
-          <span id="bgOpacityVal">60%</span>
+          <input id="siteBgOpacity" type="range" min="0" max="100" value="65">
+          <span id="siteBgOpacityVal">65%</span>
         </div>
 
         <div class="range">
           Blur
-          <input id="bgBlur" type="range" min="0" max="12" value="0">
-          <span id="bgBlurVal">0px</span>
+          <input id="siteBgBlur" type="range" min="0" max="20" value="0">
+          <span id="siteBgBlurVal">0px</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ✅ (BONUS) GRID BG -->
+    <div class="bgPanel">
+      <h3>Background GRID/Kotak (Opsional)</h3>
+      <div class="bgRow">
+        <div class="bgThumb"><img id="gridBgPreview" alt=""></div>
+
+        <div>
+          <div class="mini" style="margin:0 0 6px;">Upload gambar untuk area di belakang kotak.</div>
+          <input id="gridBgUpload" type="file" accept="image/*" />
+          <button class="aBtn warn" id="gridBgClearBtn" style="margin-left:8px;">Hapus BG</button>
+        </div>
+
+        <div class="range">
+          Opacity
+          <input id="gridBgOpacity" type="range" min="0" max="100" value="60">
+          <span id="gridBgOpacityVal">60%</span>
+        </div>
+
+        <div class="range">
+          Blur
+          <input id="gridBgBlur" type="range" min="0" max="20" value="0">
+          <span id="gridBgBlurVal">0px</span>
         </div>
       </div>
     </div>
@@ -629,10 +659,10 @@
   const PRICE = { hemat:"1R", royal:"5R", tajir:"10R", premini:"20R", guards:"15R", infi:"30R" };
   const STORAGE_KEY = "fun_box_config_v7_hype";
 
-  // ✅ background grid key (baru)
-  const BG_KEY = "fun_box_grid_bg_v1";
+  // ✅ keys background
+  const SITE_BG_KEY = "fun_box_site_bg_v1";
+  const GRID_BG_KEY = "fun_box_grid_bg_v1";
 
-  // ✅ target jumlah box per mode
   const MODE_TOTAL = { hemat:15, royal:15, tajir:15, premini:15, guards:6, infi:4 };
 
   function loadConfig(){
@@ -648,26 +678,27 @@
     localStorage.setItem(STORAGE_KEY, JSON.stringify(cfg));
   }
 
-  function loadBg(){
+  function loadBg(key, fallback){
     try{
-      const raw = localStorage.getItem(BG_KEY);
-      if(!raw) return { img:null, opacity:0.6, blur:0 };
+      const raw = localStorage.getItem(key);
+      if(!raw) return { ...fallback };
       const v = JSON.parse(raw);
       return {
         img: v?.img ?? null,
-        opacity: (typeof v?.opacity === "number" ? v.opacity : 0.6),
-        blur: (typeof v?.blur === "number" ? v.blur : 0)
+        opacity: (typeof v?.opacity === "number" ? v.opacity : fallback.opacity),
+        blur: (typeof v?.blur === "number" ? v.blur : fallback.blur),
       };
     }catch(e){
-      return { img:null, opacity:0.6, blur:0 };
+      return { ...fallback };
     }
   }
-  function saveBg(bg){
-    localStorage.setItem(BG_KEY, JSON.stringify(bg));
+  function saveBg(key, bg){
+    localStorage.setItem(key, JSON.stringify(bg));
   }
 
   let CONFIG = loadConfig();
-  let BG = loadBg();
+  let SITE_BG = loadBg(SITE_BG_KEY, { img:null, opacity:0.65, blur:0 });
+  let GRID_BG = loadBg(GRID_BG_KEY, { img:null, opacity:0.60, blur:0 });
 
   // ==========================
   // 2) OVERLAY LOGIC
@@ -695,10 +726,8 @@
 
   const STAGGER_MS = 80;
   const POPUP_DELAY_MS = 260;
-
   const SHUFFLE_ANIM_MS = 1200;
   const FLASH_MS = 90;
-
   const FOCUS_DELAY_MS = 650;
   const FOCUS_AFTER_REVEAL_MS = 240;
 
@@ -711,9 +740,9 @@
   }
 
   function getColsForCount(n){
-    if(n === 6) return 3; // 3 atas 3 bawah
-    if(n === 4) return 2; // 2 atas 2 bawah
-    return 5; // 15 => 5 kolom
+    if(n === 6) return 3;
+    if(n === 4) return 2;
+    return 5;
   }
 
   function applyGridCols(){
@@ -721,17 +750,27 @@
     grid.style.setProperty("--cols", String(cols));
   }
 
-  function applyBg(){
-    const wrap = document.querySelector("#overlayUI .gridWrap"); // ✅ spesifik
+  function applySiteBg(){
+    if(SITE_BG.img){
+      document.body.style.setProperty("--site-bg", `url("${SITE_BG.img}")`);
+    }else{
+      document.body.style.setProperty("--site-bg", "none");
+    }
+    document.body.style.setProperty("--site-bg-opacity", String(SITE_BG.opacity ?? 0.65));
+    document.body.style.setProperty("--site-bg-blur", (SITE_BG.blur ?? 0) + "px");
+  }
+
+  function applyGridBg(){
+    const wrap = document.querySelector("#overlayUI .gridWrap");
     if(!wrap) return;
 
-    if(BG.img){
-      wrap.style.setProperty("--grid-bg", `url("${BG.img}")`);
+    if(GRID_BG.img){
+      wrap.style.setProperty("--grid-bg", `url("${GRID_BG.img}")`);
     }else{
       wrap.style.setProperty("--grid-bg", "none");
     }
-    wrap.style.setProperty("--grid-bg-opacity", String(BG.opacity ?? 0.6));
-    wrap.style.setProperty("--grid-bg-blur", (BG.blur ?? 0) + "px");
+    wrap.style.setProperty("--grid-bg-opacity", String(GRID_BG.opacity ?? 0.60));
+    wrap.style.setProperty("--grid-bg-blur", (GRID_BG.blur ?? 0) + "px");
   }
 
   function buildSlotsFromConfig(modeKey){
@@ -763,7 +802,9 @@
     isShuffling = false;
     enableControls(true);
 
-    applyBg(); // ✅ pastikan ter-apply setiap reset
+    applySiteBg();  // ✅ ini yang ngubah background WEBSITE
+    applyGridBg();  // ✅ (bonus) background grid
+
     grid.classList.remove("dim-other");
     slots = buildSlotsFromConfig(mode);
     applyGridCols();
@@ -932,14 +973,23 @@
   const importBtn = document.getElementById("importBtn");
   const resetDefaultBtn = document.getElementById("resetDefaultBtn");
 
-  // BG controls
-  const bgPreview = document.getElementById("bgPreview");
-  const bgUpload = document.getElementById("bgUpload");
-  const bgClearBtn = document.getElementById("bgClearBtn");
-  const bgOpacity = document.getElementById("bgOpacity");
-  const bgOpacityVal = document.getElementById("bgOpacityVal");
-  const bgBlur = document.getElementById("bgBlur");
-  const bgBlurVal = document.getElementById("bgBlurVal");
+  // SITE BG controls
+  const siteBgPreview = document.getElementById("siteBgPreview");
+  const siteBgUpload = document.getElementById("siteBgUpload");
+  const siteBgClearBtn = document.getElementById("siteBgClearBtn");
+  const siteBgOpacity = document.getElementById("siteBgOpacity");
+  const siteBgOpacityVal = document.getElementById("siteBgOpacityVal");
+  const siteBgBlur = document.getElementById("siteBgBlur");
+  const siteBgBlurVal = document.getElementById("siteBgBlurVal");
+
+  // GRID BG controls
+  const gridBgPreview = document.getElementById("gridBgPreview");
+  const gridBgUpload = document.getElementById("gridBgUpload");
+  const gridBgClearBtn = document.getElementById("gridBgClearBtn");
+  const gridBgOpacity = document.getElementById("gridBgOpacity");
+  const gridBgOpacityVal = document.getElementById("gridBgOpacityVal");
+  const gridBgBlur = document.getElementById("gridBgBlur");
+  const gridBgBlurVal = document.getElementById("gridBgBlurVal");
 
   let adminMode = "hemat";
 
@@ -958,53 +1008,91 @@
     adminRender();
   }
 
-  function renderBgAdmin(){
-    if(!bgPreview) return;
+  function renderBgPanel(previewEl, opacityEl, opacityValEl, blurEl, blurValEl, bgObj, emoji){
+    if(previewEl) previewEl.src = bgObj.img || makeEmojiDataUrl(emoji);
 
-    bgPreview.src = BG.img || makeEmojiDataUrl("🖼️");
+    const op = Math.round((bgObj.opacity ?? 0.6) * 100);
+    if(opacityEl) opacityEl.value = String(op);
+    if(opacityValEl) opacityValEl.textContent = op + "%";
 
-    const op = Math.round((BG.opacity ?? 0.6) * 100);
-    bgOpacity.value = String(op);
-    bgOpacityVal.textContent = op + "%";
-
-    const bl = Math.round(BG.blur ?? 0);
-    bgBlur.value = String(bl);
-    bgBlurVal.textContent = bl + "px";
+    const bl = Math.round(bgObj.blur ?? 0);
+    if(blurEl) blurEl.value = String(bl);
+    if(blurValEl) blurValEl.textContent = bl + "px";
   }
 
-  bgUpload?.addEventListener("change", async () => {
-    const f = bgUpload.files?.[0];
+  function renderAllBgAdmin(){
+    renderBgPanel(siteBgPreview, siteBgOpacity, siteBgOpacityVal, siteBgBlur, siteBgBlurVal, SITE_BG, "🖼️");
+    renderBgPanel(gridBgPreview, gridBgOpacity, gridBgOpacityVal, gridBgBlur, gridBgBlurVal, GRID_BG, "🎞️");
+  }
+
+  // WEBSITE BG events
+  siteBgUpload?.addEventListener("change", async () => {
+    const f = siteBgUpload.files?.[0];
     if(!f) return;
-    const dataUrl = await fileToDataUrl(f);
-    BG.img = dataUrl;
-    saveBg(BG);
-    renderBgAdmin();
-    applyBg();
-    alert("Background grid tersimpan!");
+    SITE_BG.img = await fileToDataUrl(f);
+    saveBg(SITE_BG_KEY, SITE_BG);
+    applySiteBg();
+    renderAllBgAdmin();
+    alert("Background WEBSITE tersimpan!");
   });
 
-  bgClearBtn?.addEventListener("click", () => {
-    if(!confirm("Hapus background grid?")) return;
-    BG.img = null;
-    saveBg(BG);
-    renderBgAdmin();
-    applyBg();
+  siteBgClearBtn?.addEventListener("click", () => {
+    if(!confirm("Hapus background WEBSITE?")) return;
+    SITE_BG.img = null;
+    saveBg(SITE_BG_KEY, SITE_BG);
+    applySiteBg();
+    renderAllBgAdmin();
   });
 
-  bgOpacity?.addEventListener("input", () => {
-    const v = parseInt(bgOpacity.value || "60", 10);
-    BG.opacity = Math.max(0, Math.min(1, v / 100));
-    bgOpacityVal.textContent = v + "%";
-    saveBg(BG);
-    applyBg();
+  siteBgOpacity?.addEventListener("input", () => {
+    const v = parseInt(siteBgOpacity.value || "65", 10);
+    SITE_BG.opacity = Math.max(0, Math.min(1, v / 100));
+    siteBgOpacityVal.textContent = v + "%";
+    saveBg(SITE_BG_KEY, SITE_BG);
+    applySiteBg();
   });
 
-  bgBlur?.addEventListener("input", () => {
-    const v = parseInt(bgBlur.value || "0", 10);
-    BG.blur = Math.max(0, Math.min(30, v));
-    bgBlurVal.textContent = v + "px";
-    saveBg(BG);
-    applyBg();
+  siteBgBlur?.addEventListener("input", () => {
+    const v = parseInt(siteBgBlur.value || "0", 10);
+    SITE_BG.blur = Math.max(0, Math.min(30, v));
+    siteBgBlurVal.textContent = v + "px";
+    saveBg(SITE_BG_KEY, SITE_BG);
+    applySiteBg();
+  });
+
+  // GRID BG events
+  gridBgUpload?.addEventListener("change", async () => {
+    const f = gridBgUpload.files?.[0];
+    if(!f) return;
+    GRID_BG.img = await fileToDataUrl(f);
+    saveBg(GRID_BG_KEY, GRID_BG);
+    applyGridBg();
+    renderAllBgAdmin();
+    alert("Background GRID tersimpan!");
+  });
+
+  gridBgClearBtn?.addEventListener("click", () => {
+    if(!confirm("Hapus background GRID?")) return;
+    GRID_BG.img = null;
+    saveBg(GRID_BG_KEY, GRID_BG);
+    applyGridBg();
+    renderAllBgAdmin();
+  });
+
+  gridBgOpacity?.addEventListener("input", () => {
+    const v = parseInt(gridBgOpacity.value || "60", 10);
+    GRID_BG.opacity = Math.max(0, Math.min(1, v / 100));
+    gridBgOpacityVal.textContent = v + "%";
+    saveBg(GRID_BG_KEY, GRID_BG);
+    applyGridBg();
+  });
+
+  gridBgBlur?.addEventListener("input", () => {
+    const v = parseInt(gridBgBlur.value || "0", 10);
+    GRID_BG.blur = Math.max(0, Math.min(30, v));
+    gridBgBlurVal.textContent = v + "px";
+    saveBg(GRID_BG_KEY, GRID_BG);
+    applyGridBg();
   });
 
   function adminRender(){
@@ -1176,8 +1264,9 @@
   if(isAdmin){
     overlayUI.style.display = "none";
     adminUI.style.display = "block";
-    renderBgAdmin();
-    applyBg();
+    applySiteBg();
+    applyGridBg();
+    renderAllBgAdmin();
     adminRender();
   }else{
     overlayUI.style.display = "block";
@@ -1187,7 +1276,8 @@
     resetBtn.addEventListener("click", resetRound);
     shuffleBtn.addEventListener("click", shuffleOnly);
 
-    applyBg();    // ✅ wajib sebelum render
+    applySiteBg();
+    applyGridBg();
     resetRound();
   }
 </script>
