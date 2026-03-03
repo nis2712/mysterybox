@@ -30,6 +30,26 @@
     }
     body.modal-open{ overflow:hidden; }
 
+    /* ==========================
+       ✅ PAW CURSOR (hanya non-admin)
+       ========================== */
+    body.paw-cursor{
+      cursor:
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64' viewBox='0 0 64 64'%3E%3Ccircle cx='18' cy='18' r='6' fill='%232d3436'/%3E%3Ccircle cx='32' cy='14' r='6' fill='%232d3436'/%3E%3Ccircle cx='46' cy='18' r='6' fill='%232d3436'/%3E%3Ccircle cx='52' cy='30' r='6' fill='%232d3436'/%3E%3Cpath d='M32 30c-10 0-16 7-16 14 0 7 6 12 16 12s16-5 16-12c0-7-6-14-16-14z' fill='%232d3436'/%3E%3C/svg%3E") 10 10,
+        auto;
+    }
+    body.paw-cursor button,
+    body.paw-cursor .box,
+    body.paw-cursor .tab,
+    body.paw-cursor .aBtn,
+    body.paw-cursor input,
+    body.paw-cursor .popup,
+    body.paw-cursor .popup *{
+      cursor:
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64' viewBox='0 0 64 64'%3E%3Ccircle cx='18' cy='18' r='6' fill='%232d3436'/%3E%3Ccircle cx='32' cy='14' r='6' fill='%232d3436'/%3E%3Ccircle cx='46' cy='18' r='6' fill='%232d3436'/%3E%3Ccircle cx='52' cy='30' r='6' fill='%232d3436'/%3E%3Cpath d='M32 30c-10 0-16 7-16 14 0 7 6 12 16 12s16-5 16-12c0-7-6-14-16-14z' fill='%232d3436'/%3E%3C/svg%3E") 10 10,
+        pointer;
+    }
+
     h1{
       margin:16px 0 8px;
       color:white;
@@ -95,7 +115,6 @@
       position:relative;
     }
 
-    /* ✅ grid kolom dinamis pakai CSS variable */
     .grid{
       --cols: 5;
       display:grid;
@@ -1087,6 +1106,9 @@
     }else{
       overlayUI.style.display = "block";
       adminUI.style.display = "none";
+
+      // ✅ aktifkan paw cursor hanya di halaman utama
+      document.body.classList.add("paw-cursor");
 
       modeBtns.forEach(btn => btn.addEventListener("click", () => setMode(btn.dataset.mode)));
       resetBtn.addEventListener("click", resetRound);
