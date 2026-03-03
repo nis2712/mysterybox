@@ -17,31 +17,39 @@
     --btn2:#55efc4;
   }
 
-  /* ✅ WEBSITE BACKGROUND LAYER (custom dari admin) */
   body{
     margin:0;
     font-family:'Comic Sans MS', Arial, sans-serif;
     text-align:center;
     overflow-x:hidden;
     overflow-y:auto;
-    position:relative;
     background:linear-gradient(135deg,var(--bg1),var(--bg2));
-  }
-  body::before{
-    content:"";
-    position:fixed;
-    inset:0;
-    background-image: var(--site-bg, none);
-    background-size: cover;
-    background-position: center;
-    background-repeat:no-repeat;
-    opacity: var(--site-bg-opacity, .65);
-    filter: blur(var(--site-bg-blur, 0px));
-    transform: scale(1.05);
-    z-index:-1;
-    pointer-events:none;
+    position:relative;
   }
   body.modal-open{ overflow:hidden; }
+
+  /* ✅ LAYER BACKGROUND WEBSITE (di-set dari JS) */
+  #siteBgLayer{
+    position:fixed;
+    inset:0;
+    z-index:-2;
+    background-size:cover;
+    background-position:center;
+    background-repeat:no-repeat;
+    opacity:.65;
+    filter:none;
+    transform:scale(1.05);
+    pointer-events:none;
+  }
+
+  /* ✅ biar warna gradient default tetap ada di belakang gambar */
+  #siteBgBase{
+    position:fixed;
+    inset:0;
+    z-index:-3;
+    background:linear-gradient(135deg,var(--bg1),var(--bg2));
+    pointer-events:none;
+  }
 
   h1{
     margin:16px 0 8px;
@@ -101,19 +109,17 @@
     border-radius:18px;
   }
 
-  /* ✅ (BONUS) BACKGROUND GRID (opsional) */
-  .gridWrap::before{
-    content:"";
+  /* ✅ (opsional) background grid */
+  #gridBgLayer{
     position:absolute;
     inset:0;
-    background-image: var(--grid-bg, none);
-    background-size: cover;
-    background-position: center;
-    background-repeat:no-repeat;
-    opacity: var(--grid-bg-opacity, .60);
-    filter: blur(var(--grid-bg-blur, 0px));
-    transform: scale(1.05);
     z-index:0;
+    background-size:cover;
+    background-position:center;
+    background-repeat:no-repeat;
+    opacity:.60;
+    filter:none;
+    transform:scale(1.05);
     pointer-events:none;
   }
 
@@ -141,18 +147,12 @@
     flex-direction:column;
     justify-content:flex-start;
     align-items:center;
-    transform: translateZ(0);
   }
   .box:hover{ transform:translateY(-2px) scale(1.02); filter:brightness(1.02); }
   .box.disabled{ cursor:not-allowed; }
   .box.disabled:hover{ transform:none; filter:none; }
 
-  .num{
-    font-size:20px;
-    font-weight:1000;
-    color:var(--text);
-    line-height:1;
-  }
+  .num{ font-size:20px; font-weight:1000; color:var(--text); line-height:1; }
 
   .gift{ margin-top:10px; display:none; width:100%; }
   .giftImg{
@@ -177,7 +177,6 @@
   .box.revealed .giftName{
     animation: revealPop .45s cubic-bezier(.2,.85,.2,1) forwards;
     animation-delay: var(--d);
-    will-change: transform, opacity;
   }
   @keyframes revealPop{ to{ opacity:1; transform: translateY(0) scale(1); } }
 
@@ -197,63 +196,6 @@
     display:none;
   }
   .box.picked .tag{ display:block; }
-
-  .shuffling .box{
-    animation: shuffleShake .42s ease-in-out infinite;
-    filter: blur(.2px) brightness(1.02);
-  }
-  @keyframes shuffleShake{
-    0%{ transform:translate(0,0) rotate(0deg); }
-    25%{ transform:translate(-3px,2px) rotate(-1.8deg); }
-    50%{ transform:translate(3px,-2px) rotate(1.8deg); }
-    75%{ transform:translate(-2px,-2px) rotate(-1deg); }
-    100%{ transform:translate(0,0) rotate(0deg); }
-  }
-  .shuffleOverlay{
-    position:absolute;
-    inset:0;
-    background:rgba(255,255,255,.68);
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    gap:10px;
-    font-size:30px;
-    font-weight:1000;
-    color:#111;
-    backdrop-filter: blur(4px);
-    z-index:10;
-    border-radius:18px;
-    pointer-events:none;
-  }
-  .dots{ display:inline-flex; gap:6px; align-items:center; }
-  .dot{
-    width:10px;height:10px;border-radius:999px;
-    background:#111;
-    opacity:.25;
-    animation: dotPulse 1s infinite;
-  }
-  .dot:nth-child(2){ animation-delay:.15s; }
-  .dot:nth-child(3){ animation-delay:.3s; }
-  @keyframes dotPulse{
-    0%,100%{ opacity:.25; transform:translateY(0); }
-    50%{ opacity:.9; transform:translateY(-4px); }
-  }
-
-  .flash{
-    outline:4px solid rgba(255,255,255,.9);
-    box-shadow: 0 12px 26px rgba(0,0,0,.22), 0 0 0 6px rgba(255,255,255,.18);
-    transform: translateY(-3px) scale(1.03);
-  }
-
-  .grid.dim-other .box:not(.picked){
-    filter: blur(2px) brightness(.72);
-    transform: scale(.98);
-  }
-  .box.final-focus{
-    transform:scale(1.12);
-    z-index:6;
-    box-shadow: 0 14px 30px rgba(0,0,0,.28), 0 0 0 8px rgba(255,215,0,.22), 0 0 28px rgba(255,215,0,.55);
-  }
 
   .popup{
     position:fixed;
@@ -275,10 +217,7 @@
     animation: pop .35s ease;
     position:relative;
   }
-  @keyframes pop{
-    0%{ transform:scale(0.7); opacity:0; }
-    100%{ transform:scale(1); opacity:1; }
-  }
+  @keyframes pop{ 0%{ transform:scale(0.7); opacity:0; } 100%{ transform:scale(1); opacity:1; } }
   .popup h2{ margin:0 0 10px; color:var(--btn); font-size:28px; }
   .popupPrizeImg{
     width:150px;height:150px;object-fit:contain;
@@ -286,12 +225,7 @@
     box-shadow:0 10px 22px rgba(0,0,0,.18);
     background:#fff;
   }
-  .popupPrizeName{
-    margin:12px 0 0;
-    font-size:22px;
-    font-weight:1000;
-    color:var(--text);
-  }
+  .popupPrizeName{ margin:12px 0 0; font-size:22px; font-weight:1000; color:var(--text); }
   .close-btn{
     margin-top:16px;
     padding:10px 18px;
@@ -303,25 +237,6 @@
     background:var(--btn2);
     color:var(--text);
   }
-  .popup-content.secret-mode{
-    animation: secretPulse 1.1s ease-in-out infinite alternate;
-  }
-  @keyframes secretPulse{
-    from{ box-shadow:0 18px 40px rgba(0,0,0,.35), 0 0 18px rgba(255,0,255,.35); }
-    to{ box-shadow:0 18px 40px rgba(0,0,0,.35), 0 0 32px rgba(0,255,255,.45); }
-  }
-  .secretBadge{
-    position:absolute;
-    top:14px; right:14px;
-    padding:6px 10px;
-    border-radius:999px;
-    font-size:12px;
-    font-weight:1000;
-    background:linear-gradient(90deg,#ff00ff,#00ffff);
-    color:white;
-    display:none;
-  }
-  .popup-content.secret-mode .secretBadge{ display:inline-block; }
 
   .adminWrap{
     width:min(980px, 96vw);
@@ -364,13 +279,9 @@
     font-weight:1000;
     background:#fff;
   }
-  .tab.active{
-    border-color: rgba(0,0,0,.35);
-    box-shadow:0 6px 14px rgba(0,0,0,.10);
-  }
+  .tab.active{ border-color: rgba(0,0,0,.35); box-shadow:0 6px 14px rgba(0,0,0,.10); }
 
   .rows{ margin-top:12px; display:flex; flex-direction:column; gap:10px; }
-
   .row{
     display:grid;
     grid-template-columns: 110px 1fr 320px;
@@ -381,7 +292,6 @@
     background:#fff;
     border:2px solid rgba(0,0,0,.08);
   }
-
   .thumb{
     width:110px;height:70px;
     border-radius:14px;
@@ -390,7 +300,6 @@
     overflow:hidden;
   }
   .thumb img{ width:100%;height:100%;object-fit:contain; }
-
   .in{
     width:100%;
     padding:10px 12px;
@@ -407,6 +316,7 @@
     justify-content:flex-end;
     flex-wrap:wrap;
   }
+
   .countWrap{
     display:flex;
     flex-direction:column;
@@ -414,16 +324,8 @@
     gap:4px;
     min-width:120px;
   }
-  .countLabel{
-    font-size:12px;
-    font-weight:1000;
-    opacity:.85;
-  }
-  .countHint{
-    font-size:12px;
-    font-weight:1000;
-    opacity:.75;
-  }
+  .countLabel{ font-size:12px; font-weight:1000; opacity:.85; }
+  .countHint{ font-size:12px; font-weight:1000; opacity:.75; }
   .count{
     width:120px;
     padding:10px 12px;
@@ -441,14 +343,6 @@
     font-weight:1000;
     background:#ef4444;
     color:#fff;
-  }
-  .help{
-    margin-top:10px;
-    font-size:12px;
-    font-weight:900;
-    color:#111;
-    opacity:.85;
-    line-height:1.4;
   }
 
   .bgPanel{
@@ -487,6 +381,10 @@
 </head>
 <body>
 
+<!-- ✅ base + layer -->
+<div id="siteBgBase"></div>
+<div id="siteBgLayer"></div>
+
 <audio id="sfxWin" src="win.mp3" preload="auto"></audio>
 <audio id="sfxSecret" src="secret.mp3" preload="auto"></audio>
 
@@ -511,7 +409,8 @@
     </div>
   </div>
 
-  <div class="gridWrap">
+  <div class="gridWrap" id="gridWrap">
+    <div id="gridBgLayer"></div>
     <div class="grid" id="grid"></div>
   </div>
 </div>
@@ -519,7 +418,6 @@
 <!-- POPUP -->
 <div class="popup" id="popup">
   <div class="popup-content" id="popupContent">
-    <span class="secretBadge">SECRET!</span>
     <h2>🎉 CONGRATS! 🎉</h2>
     <img id="popupImg" class="popupPrizeImg" alt="">
     <div id="popupName" class="popupPrizeName"></div>
@@ -533,7 +431,7 @@
     <div class="adminHeader">
       <div>
         <h2>Admin Hadiah (Gambar + Rarity)</h2>
-        <div class="small">Atur langsung di website. Tersimpan di browser PC kamu (LocalStorage).</div>
+        <div class="small">Tersimpan di browser (LocalStorage).</div>
       </div>
       <div class="adminBtns">
         <button class="aBtn alt" id="addItemBtn">+ Tambah Hadiah</button>
@@ -553,30 +451,20 @@
       <div class="tab" data-mode="infi">INFI</div>
     </div>
 
-    <div class="help">
-      • Set <b>Jumlah (rarity)</b> = berapa kotak yang berisi hadiah ini.<br>
-      • Total: HEMAT/ROYAL/TAJIR/PREMINI = <b>15</b>, GUARDS = <b>6</b>, INFI = <b>4</b>.<br>
-      • Klik <b>Save</b>, lalu buka overlay normal (tanpa <b>?admin=1</b>).
-    </div>
-
-    <!-- ✅ WEBSITE BG -->
     <div class="bgPanel">
-      <h3>Background WEBSITE (Upload)</h3>
+      <h3>Background WEBSITE (yang biru)</h3>
       <div class="bgRow">
         <div class="bgThumb"><img id="siteBgPreview" alt=""></div>
-
         <div>
-          <div class="mini" style="margin:0 0 6px;">Upload gambar untuk background halaman (biru).</div>
-          <input id="siteBgUpload" type="file" accept="image/*" />
+          <div class="mini" style="margin:0 0 6px;">Upload gambar background halaman.</div>
+          <input id="siteBgUpload" type="file" accept="image/*">
           <button class="aBtn warn" id="siteBgClearBtn" style="margin-left:8px;">Hapus BG</button>
         </div>
-
         <div class="range">
           Opacity
           <input id="siteBgOpacity" type="range" min="0" max="100" value="65">
           <span id="siteBgOpacityVal">65%</span>
         </div>
-
         <div class="range">
           Blur
           <input id="siteBgBlur" type="range" min="0" max="20" value="0">
@@ -585,24 +473,20 @@
       </div>
     </div>
 
-    <!-- ✅ (BONUS) GRID BG -->
     <div class="bgPanel">
-      <h3>Background GRID/Kotak (Opsional)</h3>
+      <h3>Background GRID/Kotak (opsional)</h3>
       <div class="bgRow">
         <div class="bgThumb"><img id="gridBgPreview" alt=""></div>
-
         <div>
-          <div class="mini" style="margin:0 0 6px;">Upload gambar untuk area di belakang kotak.</div>
-          <input id="gridBgUpload" type="file" accept="image/*" />
+          <div class="mini" style="margin:0 0 6px;">Upload background area grid.</div>
+          <input id="gridBgUpload" type="file" accept="image/*">
           <button class="aBtn warn" id="gridBgClearBtn" style="margin-left:8px;">Hapus BG</button>
         </div>
-
         <div class="range">
           Opacity
           <input id="gridBgOpacity" type="range" min="0" max="100" value="60">
           <span id="gridBgOpacityVal">60%</span>
         </div>
-
         <div class="range">
           Blur
           <input id="gridBgBlur" type="range" min="0" max="20" value="0">
@@ -616,9 +500,6 @@
 </div>
 
 <script>
-  // ==========================
-  // 1) DEFAULT
-  // ==========================
   const DEFAULT_CONFIG = {
     hemat: [
       { name:"Coin 50", count:5, img:null },
@@ -659,10 +540,8 @@
   const PRICE = { hemat:"1R", royal:"5R", tajir:"10R", premini:"20R", guards:"15R", infi:"30R" };
   const STORAGE_KEY = "fun_box_config_v7_hype";
 
-  // ✅ keys background
-  const SITE_BG_KEY = "fun_box_site_bg_v1";
-  const GRID_BG_KEY = "fun_box_grid_bg_v1";
-
+  const SITE_BG_KEY = "fun_box_site_bg_v2";
+  const GRID_BG_KEY = "fun_box_grid_bg_v2";
   const MODE_TOTAL = { hemat:15, royal:15, tajir:15, premini:15, guards:6, infi:4 };
 
   function loadConfig(){
@@ -692,27 +571,74 @@
       return { ...fallback };
     }
   }
-  function saveBg(key, bg){
-    localStorage.setItem(key, JSON.stringify(bg));
+  function saveBg(key, bg){ localStorage.setItem(key, JSON.stringify(bg)); }
+
+  function makeEmojiDataUrl(emoji){
+    const svg =
+      `<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256">
+        <rect width="100%" height="100%" rx="40" ry="40" fill="white"/>
+        <text x="50%" y="58%" font-size="140" text-anchor="middle" dominant-baseline="middle">${emoji}</text>
+      </svg>`;
+    return "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg);
+  }
+  function escapeHtml(str){
+    return String(str).replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;")
+      .replaceAll('"',"&quot;").replaceAll("'","&#039;");
+  }
+  function escapeAttr(str){
+    return String(str).replaceAll('"',"&quot;").replaceAll("<","&lt;").replaceAll(">","&gt;");
+  }
+  function fileToDataUrl(file){
+    return new Promise((resolve, reject) => {
+      const r = new FileReader();
+      r.onload = () => resolve(String(r.result));
+      r.onerror = reject;
+      r.readAsDataURL(file);
+    });
   }
 
   let CONFIG = loadConfig();
   let SITE_BG = loadBg(SITE_BG_KEY, { img:null, opacity:0.65, blur:0 });
   let GRID_BG = loadBg(GRID_BG_KEY, { img:null, opacity:0.60, blur:0 });
 
+  const siteBgLayer = document.getElementById("siteBgLayer");
+  const gridBgLayer = document.getElementById("gridBgLayer");
+
+  function applySiteBg(){
+    if(!siteBgLayer) return;
+    if(SITE_BG.img){
+      siteBgLayer.style.backgroundImage = `url("${SITE_BG.img}")`;
+    }else{
+      siteBgLayer.style.backgroundImage = "none";
+    }
+    siteBgLayer.style.opacity = String(SITE_BG.opacity ?? 0.65);
+    siteBgLayer.style.filter = `blur(${SITE_BG.blur ?? 0}px)`;
+  }
+
+  function applyGridBg(){
+    if(!gridBgLayer) return;
+    if(GRID_BG.img){
+      gridBgLayer.style.backgroundImage = `url("${GRID_BG.img}")`;
+    }else{
+      gridBgLayer.style.backgroundImage = "none";
+    }
+    gridBgLayer.style.opacity = String(GRID_BG.opacity ?? 0.60);
+    gridBgLayer.style.filter = `blur(${GRID_BG.blur ?? 0}px)`;
+  }
+
   // ==========================
-  // 2) OVERLAY LOGIC
+  // OVERLAY
   // ==========================
+  const isAdmin = new URLSearchParams(location.search).get("admin") === "1";
+  const overlayUI = document.getElementById("overlayUI");
+  const adminUI = document.getElementById("adminUI");
+
   const grid = document.getElementById("grid");
   const popup = document.getElementById("popup");
-  const popupContent = document.getElementById("popupContent");
   const popupImg = document.getElementById("popupImg");
   const popupName = document.getElementById("popupName");
   const popupOkBtn = document.getElementById("popupOkBtn");
   const modeNote = document.getElementById("modeNote");
-
-  const sfxWin = document.getElementById("sfxWin");
-  const sfxSecret = document.getElementById("sfxSecret");
 
   const modeBtns = document.querySelectorAll(".mode-btn");
   const resetBtn = document.getElementById("resetBtn");
@@ -738,39 +664,14 @@
     }
     return arr;
   }
-
   function getColsForCount(n){
     if(n === 6) return 3;
     if(n === 4) return 2;
     return 5;
   }
-
   function applyGridCols(){
     const cols = getColsForCount(slots.length || (MODE_TOTAL[mode] ?? 15));
     grid.style.setProperty("--cols", String(cols));
-  }
-
-  function applySiteBg(){
-    if(SITE_BG.img){
-      document.body.style.setProperty("--site-bg", `url("${SITE_BG.img}")`);
-    }else{
-      document.body.style.setProperty("--site-bg", "none");
-    }
-    document.body.style.setProperty("--site-bg-opacity", String(SITE_BG.opacity ?? 0.65));
-    document.body.style.setProperty("--site-bg-blur", (SITE_BG.blur ?? 0) + "px");
-  }
-
-  function applyGridBg(){
-    const wrap = document.querySelector("#overlayUI .gridWrap");
-    if(!wrap) return;
-
-    if(GRID_BG.img){
-      wrap.style.setProperty("--grid-bg", `url("${GRID_BG.img}")`);
-    }else{
-      wrap.style.setProperty("--grid-bg", "none");
-    }
-    wrap.style.setProperty("--grid-bg-opacity", String(GRID_BG.opacity ?? 0.60));
-    wrap.style.setProperty("--grid-bg-blur", (GRID_BG.blur ?? 0) + "px");
   }
 
   function buildSlotsFromConfig(modeKey){
@@ -782,11 +683,9 @@
         expanded.push({ name: it.name || "Hadiah", img: it.img || null });
       }
     }
-
     const target = MODE_TOTAL[modeKey] ?? 15;
     while(expanded.length < target) expanded.push({ name:"?", img:null });
     while(expanded.length > target) expanded.pop();
-
     return fisherYatesShuffle(expanded);
   }
 
@@ -794,113 +693,6 @@
     resetBtn.disabled = !enabled;
     shuffleBtn.disabled = !enabled;
     modeBtns.forEach(b => b.disabled = !enabled);
-  }
-
-  function resetRound(){
-    pickedIndex = null;
-    isRevealing = false;
-    isShuffling = false;
-    enableControls(true);
-
-    applySiteBg();  // ✅ ini yang ngubah background WEBSITE
-    applyGridBg();  // ✅ (bonus) background grid
-
-    grid.classList.remove("dim-other");
-    slots = buildSlotsFromConfig(mode);
-    applyGridCols();
-    render(false);
-  }
-
-  function setMode(newMode){
-    if(isShuffling || isRevealing) return;
-    mode = newMode;
-    modeBtns.forEach(b => b.classList.toggle("active", b.dataset.mode === newMode));
-    modeNote.textContent = `Mode: ${newMode.toUpperCase()} (${PRICE[newMode] || "-"})`;
-    resetRound();
-  }
-
-  function shuffleOnly(){
-    if(isRevealing || pickedIndex !== null || isShuffling) return;
-
-    isShuffling = true;
-    enableControls(false);
-
-    render(false);
-
-    const overlay = document.createElement("div");
-    overlay.className = "shuffleOverlay";
-    overlay.innerHTML = `🔀 SHUFFLING <span class="dots"><span class="dot"></span><span class="dot"></span><span class="dot"></span></span>`;
-    grid.appendChild(overlay);
-    grid.classList.add("shuffling");
-
-    let flashTimer = setInterval(() => {
-      const boxes = grid.querySelectorAll(".box");
-      boxes.forEach(b => b.classList.remove("flash"));
-      const rand = Math.floor(Math.random()*slots.length);
-      if(boxes[rand]) boxes[rand].classList.add("flash");
-    }, FLASH_MS);
-
-    setTimeout(() => {
-      clearInterval(flashTimer);
-      grid.querySelectorAll(".box").forEach(b => b.classList.remove("flash"));
-
-      slots = fisherYatesShuffle(slots);
-
-      grid.classList.remove("shuffling");
-      overlay.remove();
-
-      render(false);
-      enableControls(true);
-      isShuffling = false;
-    }, SHUFFLE_ANIM_MS);
-  }
-
-  function openPopup(prize){
-    const isSecret = String(prize?.name || "").toLowerCase().includes("secret");
-    popupContent.classList.toggle("secret-mode", isSecret);
-
-    popupImg.src = prize.img || makeEmojiDataUrl("🎁");
-    popupName.textContent = prize.name || "Hadiah!";
-
-    popup.style.display = "flex";
-    document.body.classList.add("modal-open");
-
-    try{
-      const a = isSecret ? sfxSecret : sfxWin;
-      a.currentTime = 0;
-      a.play();
-    }catch{}
-  }
-
-  function closePopup(){
-    popup.style.display = "none";
-    document.body.classList.remove("modal-open");
-    grid.classList.remove("dim-other");
-    grid.querySelectorAll(".box").forEach(b => b.classList.remove("final-focus"));
-  }
-
-  function pick(i){
-    if(pickedIndex !== null || isRevealing || isShuffling) return;
-
-    pickedIndex = i;
-    isRevealing = true;
-    enableControls(false);
-
-    render(true);
-
-    const totalRevealTime = (slots.length * STAGGER_MS) + 520;
-
-    setTimeout(() => {
-      const boxes = grid.querySelectorAll(".box");
-      grid.classList.add("dim-other");
-      if(boxes[pickedIndex]) boxes[pickedIndex].classList.add("final-focus");
-
-      setTimeout(() => {
-        openPopup(slots[pickedIndex]);
-        enableControls(true);
-      }, FOCUS_DELAY_MS);
-
-    }, totalRevealTime + POPUP_DELAY_MS + FOCUS_AFTER_REVEAL_MS);
   }
 
   function render(reveal){
@@ -911,7 +703,6 @@
       if(isRevealing || isShuffling) div.classList.add("disabled");
       if(reveal) div.classList.add("revealed");
       if(pickedIndex === i) div.classList.add("picked");
-
       div.style.setProperty("--d", (i * STAGGER_MS) + "ms");
 
       const prize = slots[i];
@@ -930,50 +721,97 @@
     }
   }
 
+  function resetRound(){
+    pickedIndex = null;
+    isRevealing = false;
+    isShuffling = false;
+    enableControls(true);
+
+    applySiteBg();
+    applyGridBg();
+
+    slots = buildSlotsFromConfig(mode);
+    applyGridCols();
+    render(false);
+  }
+
+  function setMode(newMode){
+    if(isShuffling || isRevealing) return;
+    mode = newMode;
+    modeBtns.forEach(b => b.classList.toggle("active", b.dataset.mode === newMode));
+    modeNote.textContent = `Mode: ${newMode.toUpperCase()} (${PRICE[newMode] || "-"})`;
+    resetRound();
+  }
+
+  function shuffleOnly(){
+    if(isRevealing || pickedIndex !== null || isShuffling) return;
+    isShuffling = true;
+    enableControls(false);
+
+    const overlay = document.createElement("div");
+    overlay.className = "shuffleOverlay";
+    overlay.innerHTML = `🔀 SHUFFLING <span class="dots"><span class="dot"></span><span class="dot"></span><span class="dot"></span></span>`;
+    grid.appendChild(overlay);
+    grid.classList.add("shuffling");
+
+    let flashTimer = setInterval(() => {
+      const boxes = grid.querySelectorAll(".box");
+      boxes.forEach(b => b.classList.remove("flash"));
+      const rand = Math.floor(Math.random()*slots.length);
+      if(boxes[rand]) boxes[rand].classList.add("flash");
+    }, FLASH_MS);
+
+    setTimeout(() => {
+      clearInterval(flashTimer);
+      slots = fisherYatesShuffle(slots);
+      grid.classList.remove("shuffling");
+      overlay.remove();
+      render(false);
+      enableControls(true);
+      isShuffling = false;
+    }, SHUFFLE_ANIM_MS);
+  }
+
+  function openPopup(prize){
+    popupImg.src = prize.img || makeEmojiDataUrl("🎁");
+    popupName.textContent = prize.name || "Hadiah!";
+    popup.style.display = "flex";
+    document.body.classList.add("modal-open");
+  }
+  function closePopup(){
+    popup.style.display = "none";
+    document.body.classList.remove("modal-open");
+  }
+  function pick(i){
+    if(pickedIndex !== null || isRevealing || isShuffling) return;
+    pickedIndex = i;
+    isRevealing = true;
+    enableControls(false);
+
+    render(true);
+
+    const totalRevealTime = (slots.length * STAGGER_MS) + 520;
+    setTimeout(() => {
+      openPopup(slots[pickedIndex]);
+      enableControls(true);
+    }, totalRevealTime + POPUP_DELAY_MS + FOCUS_AFTER_REVEAL_MS);
+  }
+
   popupOkBtn.addEventListener("click", closePopup);
   popup.addEventListener("click", (e) => { if(e.target === popup) closePopup(); });
   window.addEventListener("keydown", (e) => { if(e.key === "Escape" && popup.style.display === "flex") closePopup(); });
 
-  function makeEmojiDataUrl(emoji){
-    const svg =
-      `<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256">
-        <rect width="100%" height="100%" rx="40" ry="40" fill="white"/>
-        <text x="50%" y="58%" font-size="140" text-anchor="middle" dominant-baseline="middle">${emoji}</text>
-      </svg>`;
-    return "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg);
-  }
-
-  function escapeHtml(str){
-    return String(str)
-      .replaceAll("&","&amp;")
-      .replaceAll("<","&lt;")
-      .replaceAll(">","&gt;")
-      .replaceAll('"',"&quot;")
-      .replaceAll("'","&#039;");
-  }
-  function escapeAttr(str){
-    return String(str)
-      .replaceAll('"',"&quot;")
-      .replaceAll("<","&lt;")
-      .replaceAll(">","&gt;");
-  }
-
   // ==========================
-  // 3) ADMIN UI
+  // ADMIN
   // ==========================
-  const isAdmin = new URLSearchParams(location.search).get("admin") === "1";
-  const overlayUI = document.getElementById("overlayUI");
-  const adminUI = document.getElementById("adminUI");
   const rowsEl = document.getElementById("rows");
   const tabEls = document.querySelectorAll(".tab");
-
   const addItemBtn = document.getElementById("addItemBtn");
   const saveBtn = document.getElementById("saveBtn");
   const exportBtn = document.getElementById("exportBtn");
   const importBtn = document.getElementById("importBtn");
   const resetDefaultBtn = document.getElementById("resetDefaultBtn");
 
-  // SITE BG controls
   const siteBgPreview = document.getElementById("siteBgPreview");
   const siteBgUpload = document.getElementById("siteBgUpload");
   const siteBgClearBtn = document.getElementById("siteBgClearBtn");
@@ -982,7 +820,6 @@
   const siteBgBlur = document.getElementById("siteBgBlur");
   const siteBgBlurVal = document.getElementById("siteBgBlurVal");
 
-  // GRID BG controls
   const gridBgPreview = document.getElementById("gridBgPreview");
   const gridBgUpload = document.getElementById("gridBgUpload");
   const gridBgClearBtn = document.getElementById("gridBgClearBtn");
@@ -993,107 +830,11 @@
 
   let adminMode = "hemat";
 
-  function fileToDataUrl(file){
-    return new Promise((resolve, reject) => {
-      const r = new FileReader();
-      r.onload = () => resolve(String(r.result));
-      r.onerror = reject;
-      r.readAsDataURL(file);
-    });
-  }
-
   function adminSetMode(m){
     adminMode = m;
     tabEls.forEach(t => t.classList.toggle("active", t.dataset.mode === m));
     adminRender();
   }
-
-  function renderBgPanel(previewEl, opacityEl, opacityValEl, blurEl, blurValEl, bgObj, emoji){
-    if(previewEl) previewEl.src = bgObj.img || makeEmojiDataUrl(emoji);
-
-    const op = Math.round((bgObj.opacity ?? 0.6) * 100);
-    if(opacityEl) opacityEl.value = String(op);
-    if(opacityValEl) opacityValEl.textContent = op + "%";
-
-    const bl = Math.round(bgObj.blur ?? 0);
-    if(blurEl) blurEl.value = String(bl);
-    if(blurValEl) blurValEl.textContent = bl + "px";
-  }
-
-  function renderAllBgAdmin(){
-    renderBgPanel(siteBgPreview, siteBgOpacity, siteBgOpacityVal, siteBgBlur, siteBgBlurVal, SITE_BG, "🖼️");
-    renderBgPanel(gridBgPreview, gridBgOpacity, gridBgOpacityVal, gridBgBlur, gridBgBlurVal, GRID_BG, "🎞️");
-  }
-
-  // WEBSITE BG events
-  siteBgUpload?.addEventListener("change", async () => {
-    const f = siteBgUpload.files?.[0];
-    if(!f) return;
-    SITE_BG.img = await fileToDataUrl(f);
-    saveBg(SITE_BG_KEY, SITE_BG);
-    applySiteBg();
-    renderAllBgAdmin();
-    alert("Background WEBSITE tersimpan!");
-  });
-
-  siteBgClearBtn?.addEventListener("click", () => {
-    if(!confirm("Hapus background WEBSITE?")) return;
-    SITE_BG.img = null;
-    saveBg(SITE_BG_KEY, SITE_BG);
-    applySiteBg();
-    renderAllBgAdmin();
-  });
-
-  siteBgOpacity?.addEventListener("input", () => {
-    const v = parseInt(siteBgOpacity.value || "65", 10);
-    SITE_BG.opacity = Math.max(0, Math.min(1, v / 100));
-    siteBgOpacityVal.textContent = v + "%";
-    saveBg(SITE_BG_KEY, SITE_BG);
-    applySiteBg();
-  });
-
-  siteBgBlur?.addEventListener("input", () => {
-    const v = parseInt(siteBgBlur.value || "0", 10);
-    SITE_BG.blur = Math.max(0, Math.min(30, v));
-    siteBgBlurVal.textContent = v + "px";
-    saveBg(SITE_BG_KEY, SITE_BG);
-    applySiteBg();
-  });
-
-  // GRID BG events
-  gridBgUpload?.addEventListener("change", async () => {
-    const f = gridBgUpload.files?.[0];
-    if(!f) return;
-    GRID_BG.img = await fileToDataUrl(f);
-    saveBg(GRID_BG_KEY, GRID_BG);
-    applyGridBg();
-    renderAllBgAdmin();
-    alert("Background GRID tersimpan!");
-  });
-
-  gridBgClearBtn?.addEventListener("click", () => {
-    if(!confirm("Hapus background GRID?")) return;
-    GRID_BG.img = null;
-    saveBg(GRID_BG_KEY, GRID_BG);
-    applyGridBg();
-    renderAllBgAdmin();
-  });
-
-  gridBgOpacity?.addEventListener("input", () => {
-    const v = parseInt(gridBgOpacity.value || "60", 10);
-    GRID_BG.opacity = Math.max(0, Math.min(1, v / 100));
-    gridBgOpacityVal.textContent = v + "%";
-    saveBg(GRID_BG_KEY, GRID_BG);
-    applyGridBg();
-  });
-
-  gridBgBlur?.addEventListener("input", () => {
-    const v = parseInt(gridBgBlur.value || "0", 10);
-    GRID_BG.blur = Math.max(0, Math.min(30, v));
-    gridBgBlurVal.textContent = v + "px";
-    saveBg(GRID_BG_KEY, GRID_BG);
-    applyGridBg();
-  });
 
   function adminRender(){
     rowsEl.innerHTML = "";
@@ -1160,9 +901,7 @@
       rightPack.appendChild(file);
       rightPack.appendChild(del);
 
-      nameInput.addEventListener("input", () => {
-        CONFIG[adminMode][idx].name = nameInput.value;
-      });
+      nameInput.addEventListener("input", () => { CONFIG[adminMode][idx].name = nameInput.value; });
 
       countInput.addEventListener("input", () => {
         CONFIG[adminMode][idx].count = parseInt(countInput.value || "0", 10);
@@ -1189,14 +928,6 @@
       row.appendChild(rightPack);
       rowsEl.appendChild(row);
     });
-
-    const totalNeed = MODE_TOTAL[adminMode] ?? 15;
-    const totalNow = (CONFIG[adminMode] || []).reduce((s,it)=>s + (parseInt(it.count||0,10)||0), 0);
-
-    const info = document.createElement("div");
-    info.className = "help";
-    info.innerHTML = `Total kotak untuk mode <b>${adminMode.toUpperCase()}</b>: <b>${totalNow}</b> (harus <b>${totalNeed}</b>).`;
-    rowsEl.appendChild(info);
   }
 
   function validateAll(){
@@ -1209,6 +940,85 @@
     }
     return errs;
   }
+
+  function renderBgAdmin(){
+    siteBgPreview.src = SITE_BG.img || makeEmojiDataUrl("🖼️");
+    siteBgOpacity.value = String(Math.round((SITE_BG.opacity ?? .65) * 100));
+    siteBgOpacityVal.textContent = siteBgOpacity.value + "%";
+    siteBgBlur.value = String(Math.round(SITE_BG.blur ?? 0));
+    siteBgBlurVal.textContent = siteBgBlur.value + "px";
+
+    gridBgPreview.src = GRID_BG.img || makeEmojiDataUrl("🎞️");
+    gridBgOpacity.value = String(Math.round((GRID_BG.opacity ?? .60) * 100));
+    gridBgOpacityVal.textContent = gridBgOpacity.value + "%";
+    gridBgBlur.value = String(Math.round(GRID_BG.blur ?? 0));
+    gridBgBlurVal.textContent = gridBgBlur.value + "px";
+  }
+
+  siteBgUpload?.addEventListener("change", async () => {
+    const f = siteBgUpload.files?.[0];
+    if(!f) return;
+    SITE_BG.img = await fileToDataUrl(f);
+    saveBg(SITE_BG_KEY, SITE_BG);
+    applySiteBg();
+    renderBgAdmin();
+    alert("BG WEBSITE tersimpan. Coba buka halaman normal (tanpa ?admin=1) / refresh.");
+  });
+
+  siteBgClearBtn?.addEventListener("click", () => {
+    SITE_BG.img = null;
+    saveBg(SITE_BG_KEY, SITE_BG);
+    applySiteBg();
+    renderBgAdmin();
+  });
+
+  siteBgOpacity?.addEventListener("input", () => {
+    const v = parseInt(siteBgOpacity.value || "65", 10);
+    SITE_BG.opacity = Math.max(0, Math.min(1, v/100));
+    siteBgOpacityVal.textContent = v + "%";
+    saveBg(SITE_BG_KEY, SITE_BG);
+    applySiteBg();
+  });
+
+  siteBgBlur?.addEventListener("input", () => {
+    const v = parseInt(siteBgBlur.value || "0", 10);
+    SITE_BG.blur = Math.max(0, Math.min(30, v));
+    siteBgBlurVal.textContent = v + "px";
+    saveBg(SITE_BG_KEY, SITE_BG);
+    applySiteBg();
+  });
+
+  gridBgUpload?.addEventListener("change", async () => {
+    const f = gridBgUpload.files?.[0];
+    if(!f) return;
+    GRID_BG.img = await fileToDataUrl(f);
+    saveBg(GRID_BG_KEY, GRID_BG);
+    applyGridBg();
+    renderBgAdmin();
+  });
+
+  gridBgClearBtn?.addEventListener("click", () => {
+    GRID_BG.img = null;
+    saveBg(GRID_BG_KEY, GRID_BG);
+    applyGridBg();
+    renderBgAdmin();
+  });
+
+  gridBgOpacity?.addEventListener("input", () => {
+    const v = parseInt(gridBgOpacity.value || "60", 10);
+    GRID_BG.opacity = Math.max(0, Math.min(1, v/100));
+    gridBgOpacityVal.textContent = v + "%";
+    saveBg(GRID_BG_KEY, GRID_BG);
+    applyGridBg();
+  });
+
+  gridBgBlur?.addEventListener("input", () => {
+    const v = parseInt(gridBgBlur.value || "0", 10);
+    GRID_BG.blur = Math.max(0, Math.min(30, v));
+    gridBgBlurVal.textContent = v + "px";
+    saveBg(GRID_BG_KEY, GRID_BG);
+    applyGridBg();
+  });
 
   addItemBtn?.addEventListener("click", () => {
     CONFIG[adminMode] = CONFIG[adminMode] || [];
@@ -1229,9 +1039,9 @@
   exportBtn?.addEventListener("click", async () => {
     try{
       await navigator.clipboard.writeText(JSON.stringify(CONFIG));
-      alert("Export berhasil: config dicopy ke clipboard.\nSimpan di Notes/WA sebagai backup.");
+      alert("Export berhasil (copy ke clipboard).");
     }catch{
-      alert("Gagal copy otomatis. Coba browser lain atau copy manual.");
+      alert("Gagal copy otomatis.");
     }
   });
 
@@ -1239,18 +1049,17 @@
     const raw = prompt("Paste config JSON hasil Export di sini:");
     if(!raw) return;
     try{
-      const cfg = JSON.parse(raw);
-      CONFIG = cfg;
+      CONFIG = JSON.parse(raw);
       saveConfig(CONFIG);
       adminRender();
       alert("Import OK!");
-    }catch(e){
+    }catch{
       alert("JSON tidak valid.");
     }
   });
 
   resetDefaultBtn?.addEventListener("click", () => {
-    if(!confirm("Reset ke default? Ini menghapus setting hadiah yang sekarang di browser.")) return;
+    if(!confirm("Reset hadiah ke default?")) return;
     CONFIG = structuredClone(DEFAULT_CONFIG);
     saveConfig(CONFIG);
     adminRender();
@@ -1258,26 +1067,21 @@
 
   tabEls.forEach(t => t.addEventListener("click", () => adminSetMode(t.dataset.mode)));
 
-  // ==========================
-  // 4) BOOT
-  // ==========================
+  // BOOT
+  applySiteBg();
+  applyGridBg();
+
   if(isAdmin){
     overlayUI.style.display = "none";
     adminUI.style.display = "block";
-    applySiteBg();
-    applyGridBg();
-    renderAllBgAdmin();
+    renderBgAdmin();
     adminRender();
   }else{
     overlayUI.style.display = "block";
     adminUI.style.display = "none";
-
     modeBtns.forEach(btn => btn.addEventListener("click", () => setMode(btn.dataset.mode)));
     resetBtn.addEventListener("click", resetRound);
     shuffleBtn.addEventListener("click", shuffleOnly);
-
-    applySiteBg();
-    applyGridBg();
     resetRound();
   }
 </script>
