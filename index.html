@@ -16,8 +16,6 @@
       --text:#2d3436;
       --btn:#ff7675;
       --btn2:#55efc4;
-      --panel: rgba(255,255,255,.78);
-      --panel2: rgba(255,255,255,.58);
     }
 
     body{
@@ -80,7 +78,6 @@
       border-radius:18px;
       font-size:15px;
       font-weight:1000;
-      cursor:pointer;
       color:white;
       box-shadow:0 6px 14px rgba(0,0,0,.18);
       transition:transform .15s ease, filter .15s ease;
@@ -99,7 +96,9 @@
     .lbinfi{ background:#6c5ce7; }
 
     .ctrl-btn{ background:var(--btn); }
-    .ctrl-btn:disabled{
+    .ctrl-btn:disabled,
+    .mode-btn:disabled,
+    .aBtn:disabled{
       opacity:.55;
       cursor:not-allowed;
       transform:none;
@@ -126,7 +125,6 @@
       background:var(--card);
       border-radius:22px;
       padding:14px 10px;
-      cursor:pointer;
       box-shadow:var(--shadow);
       transition:transform .16s ease, filter .16s ease;
       position:relative;
@@ -141,7 +139,6 @@
       transform:translateY(-2px) scale(1.02);
       filter:brightness(1.02);
     }
-    .box.disabled{ cursor:not-allowed; }
     .box.disabled:hover{ transform:none; filter:none; }
 
     .num{
@@ -326,7 +323,6 @@
       border-radius:18px;
       font-size:16px;
       font-weight:1000;
-      cursor:pointer;
       background:var(--btn2);
       color:var(--text);
     }
@@ -388,7 +384,6 @@
       border-radius:14px;
       padding:10px 12px;
       font-weight:1000;
-      cursor:pointer;
       background:#111;
       color:#fff;
     }
@@ -407,7 +402,6 @@
       padding:10px 12px;
       border-radius:14px;
       border:2px solid rgba(0,0,0,.12);
-      cursor:pointer;
       font-weight:1000;
       background:#fff;
     }
@@ -497,26 +491,22 @@
       display:inline-flex;
       align-items:center;
       justify-content:center;
-      min-width:140px;
+      min-width:155px;
       padding:10px 12px;
       border-radius:14px;
       background:#3b82f6;
       color:#fff;
       font-weight:1000;
-      cursor:pointer;
       border:none;
       text-align:center;
       box-sizing:border-box;
     }
-    .uploadInput{
-      display:none;
-    }
+    .uploadInput{ display:none; }
 
     .del{
       border:none;
       border-radius:14px;
       padding:10px 12px;
-      cursor:pointer;
       font-weight:1000;
       background:#ef4444;
       color:#fff;
@@ -532,15 +522,9 @@
     }
 
     @media (max-width: 880px){
-      .row{
-        grid-template-columns: 1fr;
-      }
-      .rightPack{
-        justify-content:flex-start;
-      }
-      .countWrap{
-        align-items:flex-start;
-      }
+      .row{ grid-template-columns: 1fr; }
+      .rightPack{ justify-content:flex-start; }
+      .countWrap{ align-items:flex-start; }
     }
 
     @media (max-width: 680px){
@@ -629,8 +613,8 @@
       <div class="help">
         • Set <b>Jumlah (rarity)</b> = berapa kotak yang berisi hadiah ini.<br>
         • Total: HEMAT/ROYAL/TAJIR/PREMINI = <b>15</b>, INFI = <b>6</b>, LBINFI = <b>10</b>.<br>
-        • Upload gambar bebas ukuran. Sistem akan atur ukuran otomatis saat disimpan.<br>
-        • Klik <b>Save</b>, lalu buka overlay normal (tanpa <b>?admin=1</b>).
+        • Gambar akan otomatis dikecilkan agar save lebih ringan.<br>
+        • Jika save gagal, biasanya penyimpanan browser penuh karena terlalu banyak gambar besar.
       </div>
 
       <div class="rows" id="rows"></div>
@@ -697,7 +681,7 @@
       lbinfi:"40R"
     };
 
-    const STORAGE_KEY = "fun_box_config_v9_lbinfi_autoimage";
+    const STORAGE_KEY = "fun_box_config_v10_savefix";
     const MODE_TOTAL = {
       hemat:15,
       royal:15,
@@ -707,13 +691,16 @@
       lbinfi:10
     };
 
+    const IMAGE_MAX_W = 400;
+    const IMAGE_MAX_H = 400;
+    const IMAGE_MAX_OUTPUT_LENGTH = 250000;
+
     function structuredCloneSafe(obj){
       return JSON.parse(JSON.stringify(obj));
     }
 
     function sanitizeConfig(cfg){
       const clean = {};
-
       for(const key of Object.keys(DEFAULT_CONFIG)){
         const src = Array.isArray(cfg?.[key]) ? cfg[key] : DEFAULT_CONFIG[key];
         clean[key] = src.map(it => ({
@@ -722,23 +709,27 @@
           img: typeof it?.img === "string" ? it.img : null
         }));
       }
-
       return clean;
+    }
+
+    function estimateConfigSize(cfg){
+      return JSON.stringify(sanitizeConfig(cfg)).length;
     }
 
     function loadConfig(){
       try{
         const raw = localStorage.getItem(STORAGE_KEY);
         if(!raw) return structuredCloneSafe(DEFAULT_CONFIG);
-        const parsed = JSON.parse(raw);
-        return sanitizeConfig(parsed);
+        return sanitizeConfig(JSON.parse(raw));
       }catch{
         return structuredCloneSafe(DEFAULT_CONFIG);
       }
     }
 
     function saveConfig(cfg){
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(sanitizeConfig(cfg)));
+      const payload = JSON.stringify(sanitizeConfig(cfg));
+      localStorage.setItem(STORAGE_KEY, payload);
+      return payload.length;
     }
 
     let CONFIG = loadConfig();
@@ -749,14 +740,12 @@
     const popupImg = document.getElementById("popupImg");
     const popupName = document.getElementById("popupName");
     const popupOkBtn = document.getElementById("popupOkBtn");
-
-    const sfxWin = document.getElementById("sfxWin");
-    const sfxSecret = document.getElementById("sfxSecret");
-
     const modeBtns = document.querySelectorAll(".mode-btn");
     const resetBtn = document.getElementById("resetBtn");
     const shuffleBtn = document.getElementById("shuffleBtn");
     const modeNote = document.getElementById("modeNote");
+    const sfxWin = document.getElementById("sfxWin");
+    const sfxSecret = document.getElementById("sfxSecret");
 
     let mode = "hemat";
     let slots = [];
@@ -808,12 +797,8 @@
 
       const target = MODE_TOTAL[modeKey] ?? 15;
 
-      while(expanded.length < target){
-        expanded.push({ name:"?", img:null });
-      }
-      while(expanded.length > target){
-        expanded.pop();
-      }
+      while(expanded.length < target) expanded.push({ name:"?", img:null });
+      while(expanded.length > target) expanded.pop();
 
       return fisherYatesShuffle(expanded);
     }
@@ -829,21 +814,17 @@
       isRevealing = false;
       isShuffling = false;
       enableControls(true);
-
       grid.classList.remove("dim-other");
       slots = buildSlotsFromConfig(mode);
-
       applyGridCols();
       render(false);
     }
 
     function setMode(newMode){
       if(isShuffling || isRevealing) return;
-
       mode = newMode;
       modeBtns.forEach(b => b.classList.toggle("active", b.dataset.mode === newMode));
       modeNote.textContent = `Mode: ${newMode.toUpperCase()} (${PRICE[newMode] || "-"})`;
-
       resetRound();
     }
 
@@ -852,13 +833,11 @@
 
       isShuffling = true;
       enableControls(false);
-
       render(false);
 
       const overlay = document.createElement("div");
       overlay.className = "shuffleOverlay";
       overlay.innerHTML = `🔀 SHUFFLING <span class="dots"><span class="dot"></span><span class="dot"></span><span class="dot"></span></span>`;
-
       grid.appendChild(overlay);
       grid.classList.add("shuffling");
 
@@ -872,12 +851,9 @@
       setTimeout(() => {
         clearInterval(flashTimer);
         grid.querySelectorAll(".box").forEach(b => b.classList.remove("flash"));
-
         slots = fisherYatesShuffle(slots);
-
         grid.classList.remove("shuffling");
         overlay.remove();
-
         render(false);
         enableControls(true);
         isShuffling = false;
@@ -887,10 +863,8 @@
     function openPopup(prize){
       const isSecret = String(prize?.name || "").toLowerCase().includes("secret");
       popupContent.classList.toggle("secret-mode", isSecret);
-
       popupImg.src = prize?.img || makeEmojiDataUrl("🎁");
       popupName.textContent = prize?.name || "Hadiah!";
-
       popup.style.display = "flex";
       document.body.classList.add("modal-open");
 
@@ -914,7 +888,6 @@
       pickedIndex = i;
       isRevealing = true;
       enableControls(false);
-
       render(true);
 
       const totalRevealTime = (slots.length * STAGGER_MS) + 520;
@@ -962,19 +935,16 @@
     }
 
     popupOkBtn.addEventListener("click", closePopup);
-    popup.addEventListener("click", (e) => {
-      if(e.target === popup) closePopup();
-    });
+    popup.addEventListener("click", (e) => { if(e.target === popup) closePopup(); });
     window.addEventListener("keydown", (e) => {
       if(e.key === "Escape" && popup.style.display === "flex") closePopup();
     });
 
     function makeEmojiDataUrl(emoji){
-      const svg =
-        `<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256">
-          <rect width="100%" height="100%" rx="40" ry="40" fill="white"/>
-          <text x="50%" y="58%" font-size="140" text-anchor="middle" dominant-baseline="middle">${emoji}</text>
-        </svg>`;
+      const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256">
+        <rect width="100%" height="100%" rx="40" ry="40" fill="white"/>
+        <text x="50%" y="58%" font-size="140" text-anchor="middle" dominant-baseline="middle">${emoji}</text>
+      </svg>`;
       return "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg);
     }
 
@@ -999,7 +969,6 @@
     const adminUI = document.getElementById("adminUI");
     const rowsEl = document.getElementById("rows");
     const tabEls = document.querySelectorAll(".tab");
-
     const addItemBtn = document.getElementById("addItemBtn");
     const saveBtn = document.getElementById("saveBtn");
     const exportBtn = document.getElementById("exportBtn");
@@ -1020,7 +989,14 @@
 
         if (isSvg || isGif) {
           const r = new FileReader();
-          r.onload = () => resolve(String(r.result));
+          r.onload = () => {
+            const result = String(r.result || "");
+            if(result.length > IMAGE_MAX_OUTPUT_LENGTH * 2){
+              reject(new Error("SVG/GIF terlalu besar untuk disimpan."));
+              return;
+            }
+            resolve(result);
+          };
           r.onerror = reject;
           r.readAsDataURL(file);
           return;
@@ -1031,13 +1007,10 @@
           const img = new Image();
 
           img.onload = () => {
-            const MAX_W = 800;
-            const MAX_H = 800;
-
             let width = img.width;
             let height = img.height;
 
-            const ratio = Math.min(MAX_W / width, MAX_H / height, 1);
+            const ratio = Math.min(IMAGE_MAX_W / width, IMAGE_MAX_H / height, 1);
             const newWidth = Math.max(1, Math.round(width * ratio));
             const newHeight = Math.max(1, Math.round(height * ratio));
 
@@ -1046,9 +1019,48 @@
             canvas.height = newHeight;
 
             const ctx = canvas.getContext("2d");
+            if(!ctx){
+              reject(new Error("Canvas tidak tersedia."));
+              return;
+            }
+
             ctx.drawImage(img, 0, 0, newWidth, newHeight);
 
-            const compressed = canvas.toDataURL("image/jpeg", 0.82);
+            let quality = 0.72;
+            let compressed = canvas.toDataURL("image/jpeg", quality);
+
+            while(compressed.length > IMAGE_MAX_OUTPUT_LENGTH && quality > 0.38){
+              quality -= 0.08;
+              compressed = canvas.toDataURL("image/jpeg", quality);
+            }
+
+            if(compressed.length > IMAGE_MAX_OUTPUT_LENGTH){
+              const smallerCanvas = document.createElement("canvas");
+              smallerCanvas.width = Math.max(1, Math.round(newWidth * 0.8));
+              smallerCanvas.height = Math.max(1, Math.round(newHeight * 0.8));
+
+              const smallerCtx = smallerCanvas.getContext("2d");
+              if(!smallerCtx){
+                reject(new Error("Canvas tidak tersedia."));
+                return;
+              }
+
+              smallerCtx.drawImage(canvas, 0, 0, smallerCanvas.width, smallerCanvas.height);
+
+              quality = 0.62;
+              compressed = smallerCanvas.toDataURL("image/jpeg", quality);
+
+              while(compressed.length > IMAGE_MAX_OUTPUT_LENGTH && quality > 0.34){
+                quality -= 0.08;
+                compressed = smallerCanvas.toDataURL("image/jpeg", quality);
+              }
+            }
+
+            if(compressed.length > IMAGE_MAX_OUTPUT_LENGTH){
+              reject(new Error("Gambar masih terlalu besar setelah dikompres."));
+              return;
+            }
+
             resolve(compressed);
           };
 
@@ -1091,20 +1103,19 @@
 
         const mini = document.createElement("div");
         mini.className = "mini";
-        mini.textContent = "Upload gambar bebas ukuran. JPG/PNG/WebP akan dikecilkan otomatis. SVG/GIF disimpan apa adanya.";
+        mini.textContent = `Upload gambar bebas ukuran. Sistem akan kecilkan otomatis. Batas hasil akhir sekitar ${Math.round(IMAGE_MAX_OUTPUT_LENGTH / 1000)}KB per gambar.`;
 
         nameWrap.appendChild(nameInput);
         nameWrap.appendChild(mini);
 
         const fileLabel = document.createElement("label");
         fileLabel.className = "uploadBtn";
-        fileLabel.textContent = "Upload Gambar";
+        fileLabel.textContent = it.img ? "Ganti Gambar" : "Upload Gambar";
 
         const file = document.createElement("input");
         file.className = "uploadInput";
         file.type = "file";
         file.accept = "image/*";
-
         fileLabel.appendChild(file);
 
         const del = document.createElement("button");
@@ -1157,19 +1168,23 @@
           const f = file.files?.[0];
           if(!f) return;
 
+          fileLabel.textContent = "Memproses...";
+          fileLabel.appendChild(file);
+
           try{
-            fileLabel.textContent = "Memproses...";
             const dataUrl = await fileToDataUrl(f);
             CONFIG[adminMode][idx].img = dataUrl;
             img.src = dataUrl;
             fileLabel.textContent = "Ganti Gambar";
             fileLabel.appendChild(file);
           }catch(err){
-            alert("File tidak bisa dipakai. Gunakan file gambar yang valid.");
+            alert(err?.message || "File tidak bisa dipakai.");
             console.error(err);
-            fileLabel.textContent = "Upload Gambar";
+            fileLabel.textContent = it.img ? "Ganti Gambar" : "Upload Gambar";
             fileLabel.appendChild(file);
           }
+
+          file.value = "";
         });
 
         del.addEventListener("click", () => {
@@ -1188,7 +1203,7 @@
 
       const info = document.createElement("div");
       info.className = "help";
-      info.innerHTML = `Total kotak untuk mode <b>${adminMode.toUpperCase()}</b>: <b>${totalNow}</b> (harus <b>${totalNeed}</b>).`;
+      info.innerHTML = `Total kotak untuk mode <b>${adminMode.toUpperCase()}</b>: <b>${totalNow}</b> (harus <b>${totalNeed}</b>). Estimasi ukuran data saat ini: <b>${Math.round(estimateConfigSize(CONFIG) / 1024)} KB</b>.`;
       rowsEl.appendChild(info);
     }
 
@@ -1219,16 +1234,28 @@
         alert("Belum bisa Save. Perbaiki dulu:\n- " + errs.join("\n- "));
         return;
       }
-      saveConfig(CONFIG);
-      alert("Saved! Sekarang buka overlay normal (hapus ?admin=1).");
+
+      saveBtn.disabled = true;
+      saveBtn.textContent = "Saving...";
+
+      try{
+        const size = saveConfig(CONFIG);
+        alert(`Saved! Ukuran data tersimpan sekitar ${Math.round(size / 1024)} KB.\nSekarang buka overlay normal (hapus ?admin=1).`);
+      }catch(err){
+        console.error(err);
+        alert("Gagal save. Kemungkinan penyimpanan browser penuh karena gambar terlalu banyak atau terlalu besar.\n\nSolusi:\n- kurangi jumlah gambar\n- ganti beberapa gambar dengan file yang lebih kecil\n- hapus gambar yang tidak perlu\n- reset localStorage lama bila perlu");
+      }finally{
+        saveBtn.disabled = false;
+        saveBtn.textContent = "Save";
+      }
     });
 
     exportBtn?.addEventListener("click", async () => {
       try{
         await navigator.clipboard.writeText(JSON.stringify(CONFIG));
-        alert("Export berhasil: config dicopy ke clipboard.\nSimpan di Notes/WA sebagai backup.");
+        alert("Export berhasil: config dicopy ke clipboard.");
       }catch{
-        alert("Gagal copy otomatis. Coba browser lain atau copy manual.");
+        alert("Gagal copy otomatis. Coba copy manual.");
       }
     });
 
@@ -1242,16 +1269,22 @@
         saveConfig(CONFIG);
         adminRender();
         alert("Import OK!");
-      }catch{
-        alert("JSON tidak valid.");
+      }catch(err){
+        console.error(err);
+        alert("JSON tidak valid atau terlalu besar untuk disimpan.");
       }
     });
 
     resetDefaultBtn?.addEventListener("click", () => {
       if(!confirm("Reset ke default? Ini menghapus setting yang sekarang di browser.")) return;
       CONFIG = structuredCloneSafe(DEFAULT_CONFIG);
-      saveConfig(CONFIG);
-      adminRender();
+      try{
+        saveConfig(CONFIG);
+        adminRender();
+      }catch(err){
+        console.error(err);
+        alert("Reset berhasil di memori, tapi gagal disimpan ke browser.");
+      }
     });
 
     tabEls.forEach(t => t.addEventListener("click", () => adminSetMode(t.dataset.mode)));
@@ -1263,7 +1296,6 @@
     }else{
       overlayUI.style.display = "block";
       adminUI.style.display = "none";
-
       document.body.classList.add("paw-cursor");
 
       modeBtns.forEach(btn => btn.addEventListener("click", () => setMode(btn.dataset.mode)));
