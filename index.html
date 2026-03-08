@@ -107,8 +107,8 @@
     }
 
     .gridWrap{
-      width: min(760px, 96vw);
-      margin: 0 auto;
+      width:min(760px, 96vw);
+      margin:0 auto;
       position:relative;
     }
 
@@ -167,6 +167,7 @@
       color:var(--text);
       opacity:0;
       transform: translateY(6px);
+      word-break:break-word;
     }
 
     .box.revealed{ background:var(--open); }
@@ -315,6 +316,7 @@
       font-size:22px;
       font-weight:1000;
       color:var(--text);
+      word-break:break-word;
     }
 
     .close-btn{
@@ -424,7 +426,7 @@
 
     .row{
       display:grid;
-      grid-template-columns: 110px 1fr 320px;
+      grid-template-columns: 110px 1fr 360px;
       gap:10px;
       align-items:center;
       padding:10px;
@@ -451,6 +453,7 @@
       border-radius:14px;
       border:2px solid rgba(0,0,0,.12);
       font-weight:900;
+      box-sizing:border-box;
     }
 
     .mini{
@@ -458,6 +461,7 @@
       font-weight:900;
       opacity:.8;
       margin-top:6px;
+      line-height:1.35;
     }
 
     .rightPack{
@@ -486,6 +490,26 @@
       border:2px solid rgba(0,0,0,.12);
       font-weight:1000;
       text-align:center;
+      box-sizing:border-box;
+    }
+
+    .uploadBtn{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      min-width:140px;
+      padding:10px 12px;
+      border-radius:14px;
+      background:#3b82f6;
+      color:#fff;
+      font-weight:1000;
+      cursor:pointer;
+      border:none;
+      text-align:center;
+      box-sizing:border-box;
+    }
+    .uploadInput{
+      display:none;
     }
 
     .del{
@@ -605,6 +629,7 @@
       <div class="help">
         • Set <b>Jumlah (rarity)</b> = berapa kotak yang berisi hadiah ini.<br>
         • Total: HEMAT/ROYAL/TAJIR/PREMINI = <b>15</b>, INFI = <b>6</b>, LBINFI = <b>10</b>.<br>
+        • Upload gambar bebas ukuran. Sistem akan atur ukuran otomatis saat disimpan.<br>
         • Klik <b>Save</b>, lalu buka overlay normal (tanpa <b>?admin=1</b>).
       </div>
 
@@ -614,34 +639,46 @@
 
   <script>
     const DEFAULT_CONFIG = {
-      hemat: [
-        { name:"Coin 50", count:5, img:null },
-        { name:"Candy", count:5, img:null },
-        { name:"Sticker", count:4, img:null },
-        { name:"Bonus", count:1, img:null }
-      ],
       royal: [
-        { name:"Coin 300", count:6, img:null },
-        { name:"Gem 10", count:5, img:null },
-        { name:"Royal Pack", count:3, img:null },
-        { name:"Lucky Spin", count:1, img:null }
+        { name:"2 crostina", count:2, img:null },
+        { name:"frezeti", count:3, img:null },
+        { name:"colosal FREZETI", count:1, img:null },
+        { name:"3 divine random", count:3, img:null },
+        { name:"colosal CROSTINA", count:1, img:null },
+        { name:"ZONK", count:5, img:null }
       ],
       tajir: [
-        { name:"Coin 1000", count:7, img:null },
-        { name:"Gem 30", count:5, img:null },
-        { name:"Mega Box", count:2, img:null },
-        { name:"SECRET", count:1, img:null }
+        { name:"3 crostina", count:3, img:null },
+        { name:"2 frezeti", count:2, img:null },
+        { name:"2 Colosal FREZETI", count:2, img:null },
+        { name:"ANUBUBUY", count:1, img:null },
+        { name:"colosal frezeti", count:2, img:null },
+        { name:"2 colosal CROSTINA", count:2, img:null },
+        { name:"300 TOKEN", count:1, img:null },
+        { name:"Shield Random", count:2, img:null }
       ],
       premini: [
-        { name:"Coin 150", count:6, img:null },
-        { name:"Gem 5", count:5, img:null },
-        { name:"Mini Pack", count:3, img:null },
-        { name:"Lucky Mini", count:1, img:null }
+        { name:"SHIELD 7s", count:2, img:null },
+        { name:"3 colosal FREZETI", count:2, img:null },
+        { name:"ANUBUBUY", count:3, img:null },
+        { name:"500 TOKEN", count:1, img:null },
+        { name:"3 colosal CROSTINA", count:3, img:null },
+        { name:"4 crostina", count:3, img:null },
+        { name:"META", count:1, img:null }
+      ],
+      hemat: [
+        { name:"ZONK", count:7, img:null },
+        { name:"COLOSAL CROSTINA", count:1, img:null },
+        { name:"FREZETI", count:3, img:null },
+        { name:"random divine", count:4, img:null }
       ],
       infi: [
-        { name:"Infi Box", count:3, img:null },
-        { name:"Infi Token", count:2, img:null },
-        { name:"INFI SECRET", count:1, img:null }
+        { name:"magmew", count:1, img:null },
+        { name:"META TECH", count:1, img:null },
+        { name:"800 TOKEN", count:1, img:null },
+        { name:"INFINITY BLOCK", count:1, img:null },
+        { name:"2 ANUBUBUY", count:1, img:null },
+        { name:"1500 TOKEN", count:1, img:null }
       ],
       lbinfi: [
         { name:"LBINFI Box", count:5, img:null },
@@ -660,7 +697,7 @@
       lbinfi:"40R"
     };
 
-    const STORAGE_KEY = "fun_box_config_v8_lbinfi";
+    const STORAGE_KEY = "fun_box_config_v9_lbinfi_autoimage";
     const MODE_TOTAL = {
       hemat:15,
       royal:15,
@@ -670,27 +707,38 @@
       lbinfi:10
     };
 
+    function structuredCloneSafe(obj){
+      return JSON.parse(JSON.stringify(obj));
+    }
+
+    function sanitizeConfig(cfg){
+      const clean = {};
+
+      for(const key of Object.keys(DEFAULT_CONFIG)){
+        const src = Array.isArray(cfg?.[key]) ? cfg[key] : DEFAULT_CONFIG[key];
+        clean[key] = src.map(it => ({
+          name: String(it?.name ?? "Hadiah"),
+          count: Math.max(0, parseInt(it?.count ?? 0, 10) || 0),
+          img: typeof it?.img === "string" ? it.img : null
+        }));
+      }
+
+      return clean;
+    }
+
     function loadConfig(){
       try{
         const raw = localStorage.getItem(STORAGE_KEY);
-        if(!raw) return structuredClone(DEFAULT_CONFIG);
-
+        if(!raw) return structuredCloneSafe(DEFAULT_CONFIG);
         const parsed = JSON.parse(raw);
-
-        for(const key of Object.keys(DEFAULT_CONFIG)){
-          if(!Array.isArray(parsed[key])){
-            parsed[key] = structuredClone(DEFAULT_CONFIG[key]);
-          }
-        }
-
-        return parsed;
+        return sanitizeConfig(parsed);
       }catch{
-        return structuredClone(DEFAULT_CONFIG);
+        return structuredCloneSafe(DEFAULT_CONFIG);
       }
     }
 
     function saveConfig(cfg){
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(cfg));
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(sanitizeConfig(cfg)));
     }
 
     let CONFIG = loadConfig();
@@ -725,8 +773,8 @@
 
     function fisherYatesShuffle(arr){
       const clone = [...arr];
-      for(let i=clone.length-1;i>0;i--){
-        const j = Math.floor(Math.random()*(i+1));
+      for(let i = clone.length - 1; i > 0; i--){
+        const j = Math.floor(Math.random() * (i + 1));
         [clone[i], clone[j]] = [clone[j], clone[i]];
       }
       return clone;
@@ -750,7 +798,7 @@
 
       for(const it of items){
         const c = Math.max(0, parseInt(it.count || 0, 10));
-        for(let k=0;k<c;k++){
+        for(let k = 0; k < c; k++){
           expanded.push({
             name: it.name || "Hadiah",
             img: it.img || null
@@ -809,8 +857,7 @@
 
       const overlay = document.createElement("div");
       overlay.className = "shuffleOverlay";
-      overlay.innerHTML =
-        `🔀 SHUFFLING <span class="dots"><span class="dot"></span><span class="dot"></span><span class="dot"></span></span>`;
+      overlay.innerHTML = `🔀 SHUFFLING <span class="dots"><span class="dot"></span><span class="dot"></span><span class="dot"></span></span>`;
 
       grid.appendChild(overlay);
       grid.classList.add("shuffling");
@@ -887,7 +934,7 @@
     function render(reveal){
       grid.innerHTML = "";
 
-      for(let i=0;i<slots.length;i++){
+      for(let i = 0; i < slots.length; i++){
         const div = document.createElement("div");
         div.className = "box";
 
@@ -961,12 +1008,56 @@
 
     let adminMode = "hemat";
 
-    function fileToDataUrl(file){
+    async function fileToDataUrl(file){
       return new Promise((resolve, reject) => {
-        const r = new FileReader();
-        r.onload = () => resolve(String(r.result));
-        r.onerror = reject;
-        r.readAsDataURL(file);
+        if (!file || !file.type.startsWith("image/")) {
+          reject(new Error("File harus berupa gambar."));
+          return;
+        }
+
+        const isSvg = file.type === "image/svg+xml";
+        const isGif = file.type === "image/gif";
+
+        if (isSvg || isGif) {
+          const r = new FileReader();
+          r.onload = () => resolve(String(r.result));
+          r.onerror = reject;
+          r.readAsDataURL(file);
+          return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = () => {
+          const img = new Image();
+
+          img.onload = () => {
+            const MAX_W = 800;
+            const MAX_H = 800;
+
+            let width = img.width;
+            let height = img.height;
+
+            const ratio = Math.min(MAX_W / width, MAX_H / height, 1);
+            const newWidth = Math.max(1, Math.round(width * ratio));
+            const newHeight = Math.max(1, Math.round(height * ratio));
+
+            const canvas = document.createElement("canvas");
+            canvas.width = newWidth;
+            canvas.height = newHeight;
+
+            const ctx = canvas.getContext("2d");
+            ctx.drawImage(img, 0, 0, newWidth, newHeight);
+
+            const compressed = canvas.toDataURL("image/jpeg", 0.82);
+            resolve(compressed);
+          };
+
+          img.onerror = () => reject(new Error("Gagal membaca gambar."));
+          img.src = String(reader.result);
+        };
+
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
       });
     }
 
@@ -1000,15 +1091,21 @@
 
         const mini = document.createElement("div");
         mini.className = "mini";
-        mini.textContent = "Upload gambar atau biarkan default 🎁";
+        mini.textContent = "Upload gambar bebas ukuran. JPG/PNG/WebP akan dikecilkan otomatis. SVG/GIF disimpan apa adanya.";
 
         nameWrap.appendChild(nameInput);
         nameWrap.appendChild(mini);
 
+        const fileLabel = document.createElement("label");
+        fileLabel.className = "uploadBtn";
+        fileLabel.textContent = "Upload Gambar";
+
         const file = document.createElement("input");
+        file.className = "uploadInput";
         file.type = "file";
         file.accept = "image/*";
-        file.style.width = "140px";
+
+        fileLabel.appendChild(file);
 
         const del = document.createElement("button");
         del.className = "del";
@@ -1042,7 +1139,7 @@
         const rightPack = document.createElement("div");
         rightPack.className = "rightPack";
         rightPack.appendChild(countWrap);
-        rightPack.appendChild(file);
+        rightPack.appendChild(fileLabel);
         rightPack.appendChild(del);
 
         nameInput.addEventListener("input", () => {
@@ -1059,9 +1156,20 @@
         file.addEventListener("change", async () => {
           const f = file.files?.[0];
           if(!f) return;
-          const dataUrl = await fileToDataUrl(f);
-          CONFIG[adminMode][idx].img = dataUrl;
-          img.src = dataUrl;
+
+          try{
+            fileLabel.textContent = "Memproses...";
+            const dataUrl = await fileToDataUrl(f);
+            CONFIG[adminMode][idx].img = dataUrl;
+            img.src = dataUrl;
+            fileLabel.textContent = "Ganti Gambar";
+            fileLabel.appendChild(file);
+          }catch(err){
+            alert("File tidak bisa dipakai. Gunakan file gambar yang valid.");
+            console.error(err);
+            fileLabel.textContent = "Upload Gambar";
+            fileLabel.appendChild(file);
+          }
         });
 
         del.addEventListener("click", () => {
@@ -1127,8 +1235,9 @@
     importBtn?.addEventListener("click", () => {
       const raw = prompt("Paste config JSON hasil Export di sini:");
       if(!raw) return;
+
       try{
-        const cfg = JSON.parse(raw);
+        const cfg = sanitizeConfig(JSON.parse(raw));
         CONFIG = cfg;
         saveConfig(CONFIG);
         adminRender();
@@ -1140,7 +1249,7 @@
 
     resetDefaultBtn?.addEventListener("click", () => {
       if(!confirm("Reset ke default? Ini menghapus setting yang sekarang di browser.")) return;
-      CONFIG = structuredClone(DEFAULT_CONFIG);
+      CONFIG = structuredCloneSafe(DEFAULT_CONFIG);
       saveConfig(CONFIG);
       adminRender();
     });
