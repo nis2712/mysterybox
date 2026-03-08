@@ -30,9 +30,6 @@
     }
     body.modal-open{ overflow:hidden; }
 
-    /* ==========================
-       ✅ PAW CURSOR (hanya non-admin)
-       ========================== */
     body.paw-cursor{
       cursor:
         url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64' viewBox='0 0 64 64'%3E%3Ccircle cx='18' cy='18' r='6' fill='%232d3436'/%3E%3Ccircle cx='32' cy='14' r='6' fill='%232d3436'/%3E%3Ccircle cx='46' cy='18' r='6' fill='%232d3436'/%3E%3Ccircle cx='52' cy='30' r='6' fill='%232d3436'/%3E%3Cpath d='M32 30c-10 0-16 7-16 14 0 7 6 12 16 12s16-5 16-12c0-7-6-14-16-14z' fill='%232d3436'/%3E%3C/svg%3E") 10 10,
@@ -98,8 +95,8 @@
     .royal{ background:#3498db; }
     .tajir{ background:#e84393; }
     .premini{ background:#f39c12; }
-    .guards{ background:#8e44ad; }
     .infi{ background:#2d3436; }
+    .lbinfi{ background:#6c5ce7; }
 
     .ctrl-btn{ background:var(--btn); }
     .ctrl-btn:disabled{
@@ -509,6 +506,35 @@
       opacity:.85;
       line-height:1.4;
     }
+
+    @media (max-width: 880px){
+      .row{
+        grid-template-columns: 1fr;
+      }
+      .rightPack{
+        justify-content:flex-start;
+      }
+      .countWrap{
+        align-items:flex-start;
+      }
+    }
+
+    @media (max-width: 680px){
+      .grid{
+        grid-template-columns:repeat(var(--cols), minmax(70px, 1fr));
+      }
+      .box{
+        min-height:88px;
+        padding:12px 8px;
+      }
+      .giftImg{
+        width:52px;
+        height:52px;
+      }
+      .giftName{
+        font-size:11px;
+      }
+    }
   </style>
 </head>
 
@@ -516,7 +542,6 @@
   <audio id="sfxWin" src="win.mp3" preload="auto"></audio>
   <audio id="sfxSecret" src="secret.mp3" preload="auto"></audio>
 
-  <!-- OVERLAY UI -->
   <div id="overlayUI">
     <h1>🎁 FUN SURPRISE BOX 🎁</h1>
     <div class="note" id="modeNote">Mode: HEMAT (3R)</div>
@@ -530,8 +555,8 @@
       </div>
 
       <div class="botrow">
-        <button class="mode-btn guards" data-mode="guards">GUARDS</button>
         <button class="mode-btn infi" data-mode="infi">INFI</button>
+        <button class="mode-btn lbinfi" data-mode="lbinfi">LBINFI</button>
         <button class="ctrl-btn" id="resetBtn">Reset</button>
         <button class="ctrl-btn" id="shuffleBtn">Shuffle</button>
       </div>
@@ -542,7 +567,6 @@
     </div>
   </div>
 
-  <!-- POPUP -->
   <div class="popup" id="popup">
     <div class="popup-content" id="popupContent">
       <span class="secretBadge">SECRET!</span>
@@ -553,7 +577,6 @@
     </div>
   </div>
 
-  <!-- ADMIN UI -->
   <div id="adminUI" style="display:none;">
     <div class="adminWrap">
       <div class="adminHeader">
@@ -575,13 +598,13 @@
         <div class="tab" data-mode="royal">ROYAL</div>
         <div class="tab" data-mode="tajir">TAJIR</div>
         <div class="tab" data-mode="premini">PREMINI</div>
-        <div class="tab" data-mode="guards">GUARDS</div>
         <div class="tab" data-mode="infi">INFI</div>
+        <div class="tab" data-mode="lbinfi">LBINFI</div>
       </div>
 
       <div class="help">
         • Set <b>Jumlah (rarity)</b> = berapa kotak yang berisi hadiah ini.<br>
-        • Total: HEMAT/ROYAL/TAJIR/PREMINI = <b>15</b>, GUARDS = <b>6</b>, INFI = <b>4</b>.<br>
+        • Total: HEMAT/ROYAL/TAJIR/PREMINI = <b>15</b>, INFI = <b>6</b>, LBINFI = <b>10</b>.<br>
         • Klik <b>Save</b>, lalu buka overlay normal (tanpa <b>?admin=1</b>).
       </div>
 
@@ -590,9 +613,6 @@
   </div>
 
   <script>
-    // ==========================
-    // 1) DEFAULT
-    // ==========================
     const DEFAULT_CONFIG = {
       hemat: [
         { name:"Coin 50", count:5, img:null },
@@ -618,27 +638,52 @@
         { name:"Mini Pack", count:3, img:null },
         { name:"Lucky Mini", count:1, img:null }
       ],
-      guards: [
-        { name:"Guard Box", count:3, img:null },
-        { name:"Guard Token", count:2, img:null },
-        { name:"GUARD SECRET", count:1, img:null }
-      ],
       infi: [
         { name:"Infi Box", count:3, img:null },
         { name:"Infi Token", count:2, img:null },
         { name:"INFI SECRET", count:1, img:null }
+      ],
+      lbinfi: [
+        { name:"LBINFI Box", count:5, img:null },
+        { name:"LBINFI Token", count:3, img:null },
+        { name:"LBINFI Rare", count:1, img:null },
+        { name:"LBINFI SECRET", count:1, img:null }
       ]
     };
 
-    const PRICE = { hemat:"1R", royal:"5R", tajir:"10R", premini:"20R", guards:"15R", infi:"30R" };
-    const STORAGE_KEY = "fun_box_config_v7_hype";
-    const MODE_TOTAL = { hemat:15, royal:15, tajir:15, premini:15, guards:6, infi:6 };
+    const PRICE = {
+      hemat:"3R",
+      royal:"5R",
+      tajir:"10R",
+      premini:"20R",
+      infi:"30R",
+      lbinfi:"40R"
+    };
+
+    const STORAGE_KEY = "fun_box_config_v8_lbinfi";
+    const MODE_TOTAL = {
+      hemat:15,
+      royal:15,
+      tajir:15,
+      premini:15,
+      infi:6,
+      lbinfi:10
+    };
 
     function loadConfig(){
       try{
         const raw = localStorage.getItem(STORAGE_KEY);
         if(!raw) return structuredClone(DEFAULT_CONFIG);
-        return JSON.parse(raw);
+
+        const parsed = JSON.parse(raw);
+
+        for(const key of Object.keys(DEFAULT_CONFIG)){
+          if(!Array.isArray(parsed[key])){
+            parsed[key] = structuredClone(DEFAULT_CONFIG[key]);
+          }
+        }
+
+        return parsed;
       }catch{
         return structuredClone(DEFAULT_CONFIG);
       }
@@ -650,16 +695,12 @@
 
     let CONFIG = loadConfig();
 
-    // ==========================
-    // 2) OVERLAY LOGIC
-    // ==========================
     const grid = document.getElementById("grid");
     const popup = document.getElementById("popup");
     const popupContent = document.getElementById("popupContent");
     const popupImg = document.getElementById("popupImg");
     const popupName = document.getElementById("popupName");
     const popupOkBtn = document.getElementById("popupOkBtn");
-    const modeNote = document.getElementById("modeNote");
 
     const sfxWin = document.getElementById("sfxWin");
     const sfxSecret = document.getElementById("sfxSecret");
@@ -667,6 +708,7 @@
     const modeBtns = document.querySelectorAll(".mode-btn");
     const resetBtn = document.getElementById("resetBtn");
     const shuffleBtn = document.getElementById("shuffleBtn");
+    const modeNote = document.getElementById("modeNote");
 
     let mode = "hemat";
     let slots = [];
@@ -676,25 +718,25 @@
 
     const STAGGER_MS = 80;
     const POPUP_DELAY_MS = 260;
-
     const SHUFFLE_ANIM_MS = 1200;
     const FLASH_MS = 90;
-
     const FOCUS_DELAY_MS = 650;
     const FOCUS_AFTER_REVEAL_MS = 240;
 
     function fisherYatesShuffle(arr){
-      for(let i=arr.length-1;i>0;i--){
+      const clone = [...arr];
+      for(let i=clone.length-1;i>0;i--){
         const j = Math.floor(Math.random()*(i+1));
-        [arr[i],arr[j]] = [arr[j],arr[i]];
+        [clone[i], clone[j]] = [clone[j], clone[i]];
       }
-      return arr;
+      return clone;
     }
 
     function getColsForCount(n){
-      if(n === 6) return 3; // 3 atas 3 bawah
-      if(n === 4) return 2; // 2 atas 2 bawah
-      return 5; // 15 => 5 kolom
+      if(n === 10) return 5;
+      if(n === 6) return 3;
+      if(n === 4) return 2;
+      return 5;
     }
 
     function applyGridCols(){
@@ -709,14 +751,21 @@
       for(const it of items){
         const c = Math.max(0, parseInt(it.count || 0, 10));
         for(let k=0;k<c;k++){
-          expanded.push({ name: it.name || "Hadiah", img: it.img || null });
+          expanded.push({
+            name: it.name || "Hadiah",
+            img: it.img || null
+          });
         }
       }
 
       const target = MODE_TOTAL[modeKey] ?? 15;
 
-      while(expanded.length < target) expanded.push({ name:"?", img:null });
-      while(expanded.length > target) expanded.pop();
+      while(expanded.length < target){
+        expanded.push({ name:"?", img:null });
+      }
+      while(expanded.length > target){
+        expanded.pop();
+      }
 
       return fisherYatesShuffle(expanded);
     }
@@ -766,10 +815,10 @@
       grid.appendChild(overlay);
       grid.classList.add("shuffling");
 
-      let flashTimer = setInterval(() => {
+      const flashTimer = setInterval(() => {
         const boxes = grid.querySelectorAll(".box");
         boxes.forEach(b => b.classList.remove("flash"));
-        const rand = Math.floor(Math.random()*slots.length);
+        const rand = Math.floor(Math.random() * slots.length);
         if(boxes[rand]) boxes[rand].classList.add("flash");
       }, FLASH_MS);
 
@@ -792,16 +841,16 @@
       const isSecret = String(prize?.name || "").toLowerCase().includes("secret");
       popupContent.classList.toggle("secret-mode", isSecret);
 
-      popupImg.src = prize.img || makeEmojiDataUrl("🎁");
-      popupName.textContent = prize.name || "Hadiah!";
+      popupImg.src = prize?.img || makeEmojiDataUrl("🎁");
+      popupName.textContent = prize?.name || "Hadiah!";
 
       popup.style.display = "flex";
       document.body.classList.add("modal-open");
 
       try{
-        const a = isSecret ? sfxSecret : sfxWin;
-        a.currentTime = 0;
-        a.play();
+        const audio = isSecret ? sfxSecret : sfxWin;
+        audio.currentTime = 0;
+        audio.play();
       }catch{}
     }
 
@@ -832,7 +881,6 @@
           openPopup(slots[pickedIndex]);
           enableControls(true);
         }, FOCUS_DELAY_MS);
-
       }, totalRevealTime + POPUP_DELAY_MS + FOCUS_AFTER_REVEAL_MS);
     }
 
@@ -854,7 +902,7 @@
 
         div.innerHTML = `
           <div class="tag">PICK</div>
-          <div class="num">${i+1}</div>
+          <div class="num">${i + 1}</div>
           <div class="gift">
             <img class="giftImg" src="${escapeAttr(imgSrc)}" alt="">
             <div class="giftName">${escapeHtml(prize?.name || "Hadiah")}</div>
@@ -867,7 +915,9 @@
     }
 
     popupOkBtn.addEventListener("click", closePopup);
-    popup.addEventListener("click", (e) => { if(e.target === popup) closePopup(); });
+    popup.addEventListener("click", (e) => {
+      if(e.target === popup) closePopup();
+    });
     window.addEventListener("keydown", (e) => {
       if(e.key === "Escape" && popup.style.display === "flex") closePopup();
     });
@@ -897,9 +947,6 @@
         .replaceAll(">","&gt;");
     }
 
-    // ==========================
-    // 3) ADMIN UI
-    // ==========================
     const isAdmin = new URLSearchParams(location.search).get("admin") === "1";
     const overlayUI = document.getElementById("overlayUI");
     const adminUI = document.getElementById("adminUI");
@@ -939,11 +986,13 @@
 
         const thumb = document.createElement("div");
         thumb.className = "thumb";
+
         const img = document.createElement("img");
         img.src = it.img || makeEmojiDataUrl("🎁");
         thumb.appendChild(img);
 
         const nameWrap = document.createElement("div");
+
         const nameInput = document.createElement("input");
         nameInput.className = "in";
         nameInput.placeholder = "Nama hadiah";
@@ -983,7 +1032,7 @@
         const countHint = document.createElement("div");
         countHint.className = "countHint";
         const totalMode = MODE_TOTAL[adminMode] ?? 15;
-        const pct0 = Math.round(((parseInt(countInput.value||"0",10)) / totalMode) * 100);
+        const pct0 = Math.round(((parseInt(countInput.value || "0", 10)) / totalMode) * 100);
         countHint.textContent = `${countInput.value}/${totalMode} ≈ ${pct0}%`;
 
         countWrap.appendChild(countLabel);
@@ -1003,7 +1052,7 @@
         countInput.addEventListener("input", () => {
           CONFIG[adminMode][idx].count = parseInt(countInput.value || "0", 10);
           const totalMode2 = MODE_TOTAL[adminMode] ?? 15;
-          const pct = Math.round(((parseInt(countInput.value||"0",10)) / totalMode2) * 100);
+          const pct = Math.round(((parseInt(countInput.value || "0", 10)) / totalMode2) * 100);
           countHint.textContent = `${countInput.value}/${totalMode2} ≈ ${pct}%`;
         });
 
@@ -1027,7 +1076,7 @@
       });
 
       const totalNeed = MODE_TOTAL[adminMode] ?? 15;
-      const totalNow = (CONFIG[adminMode] || []).reduce((s,it)=>s + (parseInt(it.count||0,10)||0), 0);
+      const totalNow = (CONFIG[adminMode] || []).reduce((s, it) => s + (parseInt(it.count || 0, 10) || 0), 0);
 
       const info = document.createElement("div");
       info.className = "help";
@@ -1041,8 +1090,10 @@
 
       for(const m of modes){
         const need = MODE_TOTAL[m];
-        const total = (CONFIG[m]||[]).reduce((s,it)=>s + (parseInt(it.count||0,10)||0), 0);
-        if(total !== need) errs.push(`${m.toUpperCase()} total ${total} (harus ${need})`);
+        const total = (CONFIG[m] || []).reduce((s, it) => s + (parseInt(it.count || 0, 10) || 0), 0);
+        if(total !== need){
+          errs.push(`${m.toUpperCase()} total ${total} (harus ${need})`);
+        }
       }
 
       return errs;
@@ -1096,9 +1147,6 @@
 
     tabEls.forEach(t => t.addEventListener("click", () => adminSetMode(t.dataset.mode)));
 
-    // ==========================
-    // 4) BOOT
-    // ==========================
     if(isAdmin){
       overlayUI.style.display = "none";
       adminUI.style.display = "block";
@@ -1107,16 +1155,16 @@
       overlayUI.style.display = "block";
       adminUI.style.display = "none";
 
-      // ✅ aktifkan paw cursor hanya di halaman utama
       document.body.classList.add("paw-cursor");
 
       modeBtns.forEach(btn => btn.addEventListener("click", () => setMode(btn.dataset.mode)));
       resetBtn.addEventListener("click", resetRound);
       shuffleBtn.addEventListener("click", shuffleOnly);
 
+      mode = "hemat";
+      modeNote.textContent = `Mode: ${mode.toUpperCase()} (${PRICE[mode] || "-"})`;
       resetRound();
     }
   </script>
 </body>
 </html>
-
