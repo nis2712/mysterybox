@@ -542,6 +542,26 @@
       .giftName{
         font-size:11px;
       }
+      .icon-btn{
+        width:44px;
+        height:44px;
+        border:none;
+        border-radius:50%;
+        font-size:20px;
+        background:white;
+        color:#2d3436;
+        box-shadow:0 6px 14px rgba(0,0,0,.18);
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        transition:.2s;
+      }
+      .icon-btn:hover{
+        transform:scale(1.08);
+      }
+      .icon-btn:disabled{
+        opacity:.5;
+      }
     }
   </style>
 </head>
@@ -565,8 +585,8 @@
       <div class="botrow">
         <button class="mode-btn infi" data-mode="infi">INFI</button>
         <button class="mode-btn lbinfi" data-mode="lbinfi">LBINFI</button>
-        <button class="ctrl-btn" id="resetBtn">Reset</button>
-        <button class="ctrl-btn" id="shuffleBtn">Shuffle</button>
+        <button class="icon-btn" id="resetBtn">🔄</button>
+        <button class="icon-btn" id="shuffleBtn">🔀</button>
       </div>
     </div>
 
@@ -687,8 +707,8 @@
       royal:15,
       tajir:15,
       premini:15,
-      infi:6,
-      lbinfi:10
+      infi:10,
+      lbinfi:15
     };
 
     const IMAGE_MAX_W = 400;
