@@ -94,6 +94,7 @@
     .premini{ background:#f39c12; }
     .infi{ background:#2d3436; }
     .lbinfi{ background:#6c5ce7; }
+    .sultan{ background:#d4af37; }
 
     .ctrl-btn{ background:var(--btn); }
     .ctrl-btn:disabled,
@@ -585,6 +586,7 @@
       <div class="botrow">
         <button class="mode-btn infi" data-mode="infi">INFI</button>
         <button class="mode-btn lbinfi" data-mode="lbinfi">LBINFI</button>
+        <button class="mode-btn sultan" data-mode="sultan">SULTAN INFI</button>
         <button class="icon-btn" id="resetBtn">🔄</button>
         <button class="icon-btn" id="shuffleBtn">🔀</button>
       </div>
@@ -628,6 +630,7 @@
         <div class="tab" data-mode="premini">PREMINI</div>
         <div class="tab" data-mode="infi">INFI</div>
         <div class="tab" data-mode="lbinfi">LBINFI</div>
+        <div class="tab" data-mode="sultan">SULTAN INFI</div>
       </div>
 
       <div class="help">
@@ -690,6 +693,12 @@
         { name:"LBINFI Rare", count:1, img:null },
         { name:"LBINFI SECRET", count:1, img:null }
       ]
+      sultan: [
+      { name:"SULTAN BOX", count:2, img:null },{ name:"2000 TOKEN", count:1, img:null },
+      { name:"META ITEM", count:1, img:null },
+      { name:"ANUBUBUY", count:1, img:null },
+      { name:"SULTAN SECRET", count:1, img:null }
+]
     };
 
     const PRICE = {
@@ -698,7 +707,8 @@
       tajir:"1.0.R",
       premini:"2.0.R",
       infi:"3.0.R",
-      lbinfi:"4.0.R"
+      lbinfi:"4.0.R",
+      SULTAN:"6.0.R"
     };
 
     const STORAGE_KEY = "fun_box_config_v10_savefix";
@@ -708,7 +718,8 @@
       tajir:15,
       premini:15,
       infi:10,
-      lbinfi:15
+      lbinfi:15,
+      sultan:6
     };
 
     const IMAGE_MAX_W = 400;
