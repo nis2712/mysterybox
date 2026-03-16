@@ -694,11 +694,12 @@
         { name:"LBINFI SECRET", count:1, img:null }
       ],
       sultan: [
-      { name:"SULTAN BOX", count:2, img:null },{ name:"2000 TOKEN", count:1, img:null },
-      { name:"META ITEM", count:1, img:null },
-      { name:"ANUBUBUY", count:1, img:null },
-      { name:"SULTAN SECRET", count:1, img:null }
-]
+        { name:"SULTAN BOX", count:3, img:null },
+        { name:"2000 TOKEN", count:2, img:null },
+        { name:"META ITEM", count:1, img:null },
+        { name:"ANUBUBUY", count:1, img:null },
+        { name:"SULTAN SECRET", count:1, img:null }
+      ]
     };
 
     const PRICE = {
@@ -719,7 +720,7 @@
       premini:15,
       infi:10,
       lbinfi:15,
-      sultan:6
+      sultan:8
     };
 
     const IMAGE_MAX_W = 400;
@@ -802,6 +803,7 @@
 
     function getColsForCount(n){
       if(n === 10) return 5;
+      if(n === 8) return 4;
       if(n === 6) return 3;
       if(n === 4) return 2;
       return 5;
