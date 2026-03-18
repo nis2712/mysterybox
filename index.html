@@ -550,24 +550,27 @@
         font-size:11px;
       }
       .icon-btn{
-        width:44px;
-        height:44px;
+        width:48px;
+        height:48px;
         border:none;
-        border-radius:50%;
+        border-radius:14px;
         font-size:20px;
-        background:white;
-        color:#2d3436;
-        box-shadow:0 6px 14px rgba(0,0,0,.18);
+        background:#1f2937;
+        color:#22d3ee;
+        box-shadow:
+          0 0 10px rgba(34,211,238,.4),
+          0 6px 14px rgba(0,0,0,.3);
         display:flex;
         align-items:center;
         justify-content:center;
-        transition:.2s;
+        transition:.25s;
       }
       .icon-btn:hover{
+        color:#ff4ecd;
+        box-shadow:
+          0 0 16px rgba(255,78,205,.7),
+          0 8px 18px rgba(0,0,0,.4);
         transform:scale(1.08);
-      }
-      .icon-btn:disabled{
-        opacity:.5;
       }
     }
   </style>
