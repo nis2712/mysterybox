@@ -7,21 +7,24 @@
 
   <style>
     :root{
-      --bg1:#74ebd5;
-      --bg2:#acb6e5;
+      --bg1:#1d145c;
+      --bg2:#6d28d9;
       --card:#ffffff;
-      --shadow: 0 10px 22px rgba(0,0,0,.18);
-      --pick: rgba(255,215,0,.9);
-      --open:#ffeaa7;
-      --text:#2d3436;
-      --btn:#ff7675;
-      --btn2:#55efc4;
+      --shadow:0 10px 24px rgba(0,0,0,.28);
+      --pick:rgba(255,215,0,.95);
+      --open:#fff0b3;
+      --text:#2b2340;
+      --btn:#ff4ecd;
+      --btn2:#22d3ee;
     }
-
     body{
       margin:0;
       font-family:'Comic Sans MS', Arial, sans-serif;
-      background:linear-gradient(135deg,var(--bg1),var(--bg2));
+      background:
+        radial-gradient(circle at top left, rgba(255,78,205,.28), transparent 28%),
+        radial-gradient(circle at top right, rgba(34,211,238,.22), transparent 26%),
+        radial-gradient(circle at bottom center, rgba(255,215,0,.12), transparent 22%),
+        linear-gradient(135deg, #140f3d, #5b21b6, #7c3aed);
       text-align:center;
       overflow-x:hidden;
       overflow-y:auto;
@@ -48,7 +51,10 @@
     h1{
       margin:16px 0 8px;
       color:white;
-      text-shadow:2px 2px 6px rgba(0,0,0,.22);
+      text-shadow:
+        0 0 8px rgba(255,78,205,.45),
+        0 0 18px rgba(34,211,238,.28),
+        2px 2px 6px rgba(0,0,0,.22);
     }
     .note{
       color:white;
@@ -88,13 +94,13 @@
     }
     .mode-btn.active{ outline:3px solid rgba(255,255,255,.7); }
 
-    .hemat{ background:#2ecc71; }
-    .royal{ background:#3498db; }
-    .tajir{ background:#e84393; }
-    .premini{ background:#f39c12; }
-    .infi{ background:#2d3436; }
-    .lbinfi{ background:#6c5ce7; }
-    .sultan{ background:#d4af37; }
+    .hemat{ background:#22c55e; }
+    .royal{ background:#3b82f6; }
+    .tajir{ background:#ec4899; }
+    .premini{ background:#f59e0b; }
+    .infi{ background:#1f2937; }
+    .lbinfi{ background:#7c3aed; }
+    .sultan{ background:linear-gradient(135deg,#facc15,#f59e0b); color:#2b2340; }
 
     .ctrl-btn{ background:var(--btn); }
     .ctrl-btn:disabled,
