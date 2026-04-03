@@ -105,17 +105,81 @@
     .ctrl-btn{ background:var(--btn); }
     .ctrl-btn:disabled,
     .mode-btn:disabled,
-    .aBtn:disabled{
+    .aBtn:disabled,
+    .feature-btn:disabled{
       opacity:.55;
       cursor:not-allowed;
       transform:none;
       filter:none;
     }
 
+    .playArea{
+      width:min(980px, 96vw);
+      margin:0 auto;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      gap:18px;
+    }
+
     .gridWrap{
       width:min(760px, 96vw);
       margin:0 auto;
       position:relative;
+    }
+
+    .featureDock{
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+      align-items:stretch;
+      justify-content:center;
+    }
+
+    .feature-btn{
+      min-width:170px;
+      padding:12px 14px;
+      border:none;
+      border-radius:16px;
+      font-size:14px;
+      font-weight:1000;
+      color:white;
+      background:rgba(255,255,255,.14);
+      backdrop-filter:blur(10px);
+      box-shadow:
+        0 8px 18px rgba(0,0,0,.22),
+        inset 0 0 10px rgba(255,255,255,.08);
+      transition:transform .2s ease, box-shadow .2s ease, background .2s ease;
+    }
+
+    .feature-btn:hover{
+      transform:translateY(-2px) scale(1.02);
+      box-shadow:
+        0 12px 22px rgba(0,0,0,.28),
+        inset 0 0 12px rgba(255,255,255,.10);
+    }
+
+    .feature-btn.active{
+      background:#ef4444;
+      box-shadow:
+        0 10px 22px rgba(239,68,68,.35),
+        0 0 0 4px rgba(239,68,68,.14);
+    }
+
+    .feature-btn.ghost{
+      opacity:.55;
+    }
+
+    .mode-helper{
+      margin:4px 0 8px;
+      color:white;
+      font-weight:1000;
+      text-shadow:2px 2px 6px rgba(0,0,0,.18);
+      display:none;
+    }
+
+    .mode-helper.show{
+      display:block;
     }
 
     .grid{
@@ -193,6 +257,43 @@
       box-shadow: 0 10px 22px rgba(0,0,0,.22), 0 0 0 6px rgba(255,215,0,.18);
     }
 
+    .box.eliminated{
+      background:#f3f4f6;
+      opacity:.96;
+      filter:grayscale(100%);
+      outline:4px solid rgba(239,68,68,.96);
+      box-shadow:
+        0 10px 24px rgba(0,0,0,.22),
+        0 0 0 6px rgba(239,68,68,.14);
+    }
+
+    .box.eliminated:hover{
+      transform:none;
+      filter:grayscale(100%);
+    }
+
+    .box.eliminated .tag{
+      display:block;
+      background:rgba(239,68,68,.96);
+      color:white;
+    }
+
+    .box.eliminated::after{
+      content:"";
+      position:absolute;
+      inset:10px;
+      border-radius:18px;
+      background:
+        linear-gradient(
+          135deg,
+          transparent 46%,
+          rgba(239,68,68,.95) 46%,
+          rgba(239,68,68,.95) 54%,
+          transparent 54%
+        );
+      pointer-events:none;
+    }
+
     .tag{
       position:absolute;
       top:10px;
@@ -263,6 +364,11 @@
     .grid.dim-other .box:not(.picked){
       filter: blur(2px) brightness(.72);
       transform: scale(.98);
+    }
+
+    .grid.dim-other .box.eliminated{
+      filter:grayscale(100%);
+      transform:none;
     }
 
     .box.final-focus{
@@ -528,6 +634,50 @@
       line-height:1.4;
     }
 
+    .icon-btn{
+      width:48px;
+      height:48px;
+      border:none;
+      border-radius:16px;
+      font-size:20px;
+      color:white;
+      background: rgba(255,255,255,0.15);
+      backdrop-filter: blur(10px);
+      box-shadow:
+        0 6px 14px rgba(0,0,0,.25),
+        inset 0 0 10px rgba(255,255,255,.15);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      transition:.25s;
+    }
+    .icon-btn:hover{
+      transform:translateY(-2px) scale(1.05);
+      box-shadow:
+        0 10px 20px rgba(0,0,0,.35),
+        0 0 12px rgba(255,255,255,.25);
+    }
+    .icon-btn:active{
+      transform:scale(.92);
+    }
+
+    @media (max-width: 900px){
+      .playArea{
+        flex-direction:column;
+        align-items:center;
+      }
+
+      .featureDock{
+        flex-direction:row;
+        flex-wrap:wrap;
+        justify-content:center;
+      }
+
+      .feature-btn{
+        min-width:150px;
+      }
+    }
+
     @media (max-width: 880px){
       .row{ grid-template-columns: 1fr; }
       .rightPack{ justify-content:flex-start; }
@@ -549,36 +699,6 @@
       .giftName{
         font-size:11px;
       }
-      .icon-btn{
-  width:48px;
-  height:48px;
-  border:none;
-  border-radius:16px;
-  font-size:20px;
-  color:white;
-
-  background: rgba(255,255,255,0.15);
-  backdrop-filter: blur(10px);
-
-  box-shadow:
-    0 6px 14px rgba(0,0,0,.25),
-    inset 0 0 10px rgba(255,255,255,.15);
-
-  display:flex;
-  align-items:center;
-  justify-content:center;
-
-  transition:.25s;
-}
-.icon-btn:hover{
-  transform:translateY(-2px) scale(1.05);
-  box-shadow:
-    0 10px 20px rgba(0,0,0,.35),
-    0 0 12px rgba(255,255,255,.25);
-}
-.icon-btn:active{
-  transform:scale(.92);
-}
     }
   </style>
 </head>
@@ -608,8 +728,17 @@
       </div>
     </div>
 
-    <div class="gridWrap">
-      <div class="grid" id="grid"></div>
+    <div class="mode-helper" id="modeHelper">Mode eliminasi aktif: klik box untuk tandai / buka eliminasi.</div>
+
+    <div class="playArea">
+      <div class="gridWrap">
+        <div class="grid" id="grid"></div>
+      </div>
+
+      <div class="featureDock">
+        <button class="feature-btn" id="elimToggleBtn">🚫 ELIMINASI OFF</button>
+        <button class="feature-btn ghost" id="feature2Btn" disabled>✨ FITUR 2</button>
+      </div>
     </div>
   </div>
 
@@ -727,6 +856,8 @@
     };
 
     const STORAGE_KEY = "fun_box_config_v10_savefix";
+    const ELIMINATION_KEY = "fun_box_elimination_v1";
+
     const MODE_TOTAL = {
       hemat:5,
       royal:5,
@@ -778,7 +909,68 @@
       return payload.length;
     }
 
+    function defaultElimination(){
+      return {
+        hemat: [],
+        royal: [],
+        tajir: [],
+        premini: [],
+        infi: [],
+        lbinfi: [],
+        sultan: []
+      };
+    }
+
+    function sanitizeElimination(data){
+      const clean = defaultElimination();
+
+      for(const key of Object.keys(clean)){
+        const src = Array.isArray(data?.[key]) ? data[key] : [];
+        const max = MODE_TOTAL[key] ?? 0;
+
+        clean[key] = [...new Set(
+          src
+            .map(v => parseInt(v, 10))
+            .filter(v => Number.isInteger(v) && v >= 0 && v < max)
+        )].sort((a, b) => a - b);
+      }
+
+      return clean;
+    }
+
+    function loadElimination(){
+      try{
+        const raw = localStorage.getItem(ELIMINATION_KEY);
+        if(!raw) return defaultElimination();
+        return sanitizeElimination(JSON.parse(raw));
+      }catch{
+        return defaultElimination();
+      }
+    }
+
+    function saveElimination(data){
+      localStorage.setItem(ELIMINATION_KEY, JSON.stringify(sanitizeElimination(data)));
+    }
+
+    function isEliminated(modeKey, index){
+      return (ELIMINATION[modeKey] || []).includes(index);
+    }
+
+    function toggleElimination(modeKey, index){
+      ELIMINATION[modeKey] = ELIMINATION[modeKey] || [];
+
+      if(ELIMINATION[modeKey].includes(index)){
+        ELIMINATION[modeKey] = ELIMINATION[modeKey].filter(v => v !== index);
+      }else{
+        ELIMINATION[modeKey].push(index);
+        ELIMINATION[modeKey].sort((a, b) => a - b);
+      }
+
+      saveElimination(ELIMINATION);
+    }
+
     let CONFIG = loadConfig();
+    let ELIMINATION = loadElimination();
 
     const grid = document.getElementById("grid");
     const popup = document.getElementById("popup");
@@ -790,6 +982,8 @@
     const resetBtn = document.getElementById("resetBtn");
     const shuffleBtn = document.getElementById("shuffleBtn");
     const modeNote = document.getElementById("modeNote");
+    const modeHelper = document.getElementById("modeHelper");
+    const elimToggleBtn = document.getElementById("elimToggleBtn");
     const sfxWin = document.getElementById("sfxWin");
     const sfxSecret = document.getElementById("sfxSecret");
 
@@ -798,6 +992,7 @@
     let pickedIndex = null;
     let isRevealing = false;
     let isShuffling = false;
+    let eliminationMode = false;
 
     const STAGGER_MS = 80;
     const POPUP_DELAY_MS = 260;
@@ -854,6 +1049,21 @@
       resetBtn.disabled = !enabled;
       shuffleBtn.disabled = !enabled;
       modeBtns.forEach(b => b.disabled = !enabled);
+      if(elimToggleBtn) elimToggleBtn.disabled = !enabled;
+    }
+
+    function updateEliminationToggleUI(){
+      if(elimToggleBtn){
+        elimToggleBtn.textContent = eliminationMode
+          ? "🚫 ELIMINASI ON"
+          : "🚫 ELIMINASI OFF";
+
+        elimToggleBtn.classList.toggle("active", eliminationMode);
+      }
+
+      if(modeHelper){
+        modeHelper.classList.toggle("show", eliminationMode);
+      }
     }
 
     function resetRound(){
@@ -930,6 +1140,14 @@
     }
 
     function pick(i){
+      if(eliminationMode){
+        if(isRevealing || isShuffling) return;
+        toggleElimination(mode, i);
+        render(false);
+        return;
+      }
+
+      if(isEliminated(mode, i)) return;
       if(pickedIndex !== null || isRevealing || isShuffling) return;
 
       pickedIndex = i;
@@ -958,9 +1176,13 @@
         const div = document.createElement("div");
         div.className = "box";
 
+        const eliminated = isEliminated(mode, i);
+        const shouldReveal = reveal || eliminated;
+
         if(isRevealing || isShuffling) div.classList.add("disabled");
-        if(reveal) div.classList.add("revealed");
+        if(shouldReveal) div.classList.add("revealed");
         if(pickedIndex === i) div.classList.add("picked");
+        if(eliminated) div.classList.add("eliminated");
 
         div.style.setProperty("--d", (i * STAGGER_MS) + "ms");
 
@@ -968,7 +1190,7 @@
         const imgSrc = prize?.img || makeEmojiDataUrl("🎁");
 
         div.innerHTML = `
-          <div class="tag">PICK</div>
+          <div class="tag">${eliminated ? "ELIMINASI" : "PICK"}</div>
           <div class="num">${i + 1}</div>
           <div class="gift">
             <img class="giftImg" src="${escapeAttr(imgSrc)}" alt="">
@@ -1349,13 +1571,17 @@
       resetBtn.addEventListener("click", resetRound);
       shuffleBtn.addEventListener("click", shuffleOnly);
 
+      elimToggleBtn?.addEventListener("click", () => {
+        if(isRevealing || isShuffling) return;
+        eliminationMode = !eliminationMode;
+        updateEliminationToggleUI();
+      });
+
       mode = "hemat";
       modeNote.textContent = `Mode: ${mode.toUpperCase()} (${PRICE[mode] || "-"})`;
+      updateEliminationToggleUI();
       resetRound();
     }
   </script>
 </body>
 </html>
-
-
-
