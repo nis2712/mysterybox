@@ -179,10 +179,6 @@
       background:#22c55e;
     }
 
-    .feature-btn.ghost{
-      opacity:.45;
-    }
-
     .mode-helper{
       margin:4px 0 8px;
       color:white;
@@ -890,7 +886,7 @@
     };
 
     const STORAGE_KEY = "fun_box_config_v10_savefix";
-    const ELIMINATION_KEY = "fun_box_elimination_v1";
+    const ELIMINATION_KEY = "fun_box_elimination_value_v2";
 
     const MODE_TOTAL = {
       hemat:5,
@@ -908,6 +904,14 @@
 
     function structuredCloneSafe(obj){
       return JSON.parse(JSON.stringify(obj));
+    }
+
+    function sanitizePrizeName(name){
+      return String(name ?? "").trim();
+    }
+
+    function sanitizePrizeNameKey(name){
+      return sanitizePrizeName(name).toLowerCase();
     }
 
     function sanitizeConfig(cfg){
@@ -960,13 +964,11 @@
 
       for(const key of Object.keys(clean)){
         const src = Array.isArray(data?.[key]) ? data[key] : [];
-        const max = MODE_TOTAL[key] ?? 0;
-
         clean[key] = [...new Set(
           src
-            .map(v => parseInt(v, 10))
-            .filter(v => Number.isInteger(v) && v >= 0 && v < max)
-        )].sort((a, b) => a - b);
+            .map(v => sanitizePrizeName(v))
+            .filter(v => v.length > 0)
+        )].sort((a, b) => a.localeCompare(b));
       }
 
       return clean;
@@ -986,18 +988,31 @@
       localStorage.setItem(ELIMINATION_KEY, JSON.stringify(sanitizeElimination(data)));
     }
 
-    function isEliminated(modeKey, index){
-      return (ELIMINATION[modeKey] || []).includes(index);
+    function isEliminatedByName(modeKey, prizeName){
+      const list = ELIMINATION[modeKey] || [];
+      const key = sanitizePrizeNameKey(prizeName);
+      return list.some(v => sanitizePrizeNameKey(v) === key);
     }
 
-    function toggleElimination(modeKey, index){
-      ELIMINATION[modeKey] = ELIMINATION[modeKey] || [];
+    function isEliminated(modeKey, index){
+      const prizeName = slots[index]?.name || "";
+      return isEliminatedByName(modeKey, prizeName);
+    }
 
-      if(ELIMINATION[modeKey].includes(index)){
-        ELIMINATION[modeKey] = ELIMINATION[modeKey].filter(v => v !== index);
+    function toggleEliminationByPrize(modeKey, prizeName){
+      const normalized = sanitizePrizeName(prizeName);
+      const normalizedKey = sanitizePrizeNameKey(prizeName);
+
+      if(!normalized) return;
+
+      ELIMINATION[modeKey] = ELIMINATION[modeKey] || [];
+      const idx = ELIMINATION[modeKey].findIndex(v => sanitizePrizeNameKey(v) === normalizedKey);
+
+      if(idx >= 0){
+        ELIMINATION[modeKey].splice(idx, 1);
       }else{
-        ELIMINATION[modeKey].push(index);
-        ELIMINATION[modeKey].sort((a, b) => a - b);
+        ELIMINATION[modeKey].push(normalized);
+        ELIMINATION[modeKey].sort((a, b) => a.localeCompare(b));
       }
 
       saveElimination(ELIMINATION);
@@ -1105,10 +1120,6 @@
       openedIndexes = slots.map((_, i) => i);
     }
 
-    function hasClosedPlayableBoxes(){
-      return slots.some((_, i) => !isEliminated(mode, i) && !isOpenedInContinue(i));
-    }
-
     function updateFeatureButtonsUI(){
       if(elimToggleBtn){
         elimToggleBtn.textContent = eliminationMode
@@ -1129,7 +1140,7 @@
       if(modeHelper){
         let helperText = "";
         if(eliminationMode){
-          helperText = "Mode eliminasi aktif: klik box untuk tandai / buka eliminasi.";
+          helperText = "Mode eliminasi aktif: klik box untuk eliminasi berdasarkan isi/value hadiah.";
         }else if(continueMode){
           helperText = "Mode continue aktif: hanya box yang dipilih yang akan terbuka.";
         }
@@ -1257,7 +1268,7 @@
       if(eliminationMode){
         if(isRevealing || isShuffling) return;
         if(isOpenedInContinue(i)) return;
-        toggleElimination(mode, i);
+        toggleEliminationByPrize(mode, slots[i]?.name || "");
         render(false);
         return;
       }
