@@ -119,12 +119,14 @@
       position:relative;
       min-height:220px;
     }
+
     .gridWrap{
       width:min(760px, 96vw);
       position:relative;
       left:50%;
-      transform:translateX(-50%)
+      transform:translateX(-50%);
     }
+
     .featureDock{
       position:absolute;
       left:100%;
@@ -138,6 +140,11 @@
       z-index:20;
       opacity:.6;
     }
+
+    .featureDock:hover{
+      opacity:1;
+    }
+
     .feature-btn{
       min-width:120px;
       padding:8px 10px;
@@ -154,22 +161,26 @@
       opacity:.7;
       transition:.2s ease;
     }
+
     .feature-btn:hover{
       opacity:1;
       transform:translateY(-1px) scale(1.02);
     }
+
     .feature-btn.active{
+      opacity:1;
+    }
+
+    .feature-btn.elim-active{
       background:#ef4444;
-      opacity:1;
     }
-    .featureDock{
-      opacity:.6;
+
+    .feature-btn.continue-active{
+      background:#22c55e;
     }
-    .featureDock:hover{
-      opacity:1;
-    }
+
     .feature-btn.ghost{
-      opacity:.55;
+      opacity:.45;
     }
 
     .mode-helper{
@@ -294,6 +305,19 @@
           transparent 54%
         );
       pointer-events:none;
+    }
+
+    .box.opened-continue{
+      outline:4px solid rgba(34,197,94,.92);
+      box-shadow:
+        0 10px 22px rgba(0,0,0,.22),
+        0 0 0 6px rgba(34,197,94,.14);
+    }
+
+    .box.opened-continue .tag{
+      display:block;
+      background:rgba(34,197,94,.95);
+      color:white;
     }
 
     .tag{
@@ -665,13 +689,22 @@
 
     @media (max-width: 900px){
       .playArea{
-        flex-direction:column;
-        align-items:center;
+        min-height:auto;
+      }
+
+      .gridWrap{
+        left:0;
+        transform:none;
+        margin:0 auto;
       }
 
       .featureDock{
+        position:static;
+        transform:none;
+        margin:12px auto 0;
         flex-direction:row;
-        flex-wrap:wrap;
+        justify-content:center;
+        opacity:1;
       }
 
       .feature-btn{
@@ -734,11 +767,11 @@
     <div class="playArea">
       <div class="gridWrap">
         <div class="grid" id="grid"></div>
-      </div>
 
-      <div class="featureDock">
-        <button class="feature-btn" id="elimToggleBtn">🚫 ELIMINASI OFF</button>
-        <button class="feature-btn ghost" id="feature2Btn" disabled>✨ FITUR 2</button>
+        <div class="featureDock">
+          <button class="feature-btn" id="elimToggleBtn">🚫 ELIMINASI OFF</button>
+          <button class="feature-btn" id="continueToggleBtn">▶ CONTINUE OFF</button>
+        </div>
       </div>
     </div>
   </div>
@@ -985,6 +1018,7 @@
     const modeNote = document.getElementById("modeNote");
     const modeHelper = document.getElementById("modeHelper");
     const elimToggleBtn = document.getElementById("elimToggleBtn");
+    const continueToggleBtn = document.getElementById("continueToggleBtn");
     const sfxWin = document.getElementById("sfxWin");
     const sfxSecret = document.getElementById("sfxSecret");
 
@@ -994,6 +1028,8 @@
     let isRevealing = false;
     let isShuffling = false;
     let eliminationMode = false;
+    let continueMode = false;
+    let openedIndexes = [];
 
     const STAGGER_MS = 80;
     const POPUP_DELAY_MS = 260;
@@ -1051,24 +1087,61 @@
       shuffleBtn.disabled = !enabled;
       modeBtns.forEach(b => b.disabled = !enabled);
       if(elimToggleBtn) elimToggleBtn.disabled = !enabled;
+      if(continueToggleBtn) continueToggleBtn.disabled = !enabled;
     }
 
-    function updateEliminationToggleUI(){
+    function isOpenedInContinue(index){
+      return openedIndexes.includes(index);
+    }
+
+    function openIndexInContinue(index){
+      if(!openedIndexes.includes(index)){
+        openedIndexes.push(index);
+        openedIndexes.sort((a, b) => a - b);
+      }
+    }
+
+    function revealAllIndexes(){
+      openedIndexes = slots.map((_, i) => i);
+    }
+
+    function hasClosedPlayableBoxes(){
+      return slots.some((_, i) => !isEliminated(mode, i) && !isOpenedInContinue(i));
+    }
+
+    function updateFeatureButtonsUI(){
       if(elimToggleBtn){
         elimToggleBtn.textContent = eliminationMode
           ? "🚫 ELIMINASI ON"
           : "🚫 ELIMINASI OFF";
-
         elimToggleBtn.classList.toggle("active", eliminationMode);
+        elimToggleBtn.classList.toggle("elim-active", eliminationMode);
+      }
+
+      if(continueToggleBtn){
+        continueToggleBtn.textContent = continueMode
+          ? "▶ CONTINUE ON"
+          : "▶ CONTINUE OFF";
+        continueToggleBtn.classList.toggle("active", continueMode);
+        continueToggleBtn.classList.toggle("continue-active", continueMode);
       }
 
       if(modeHelper){
-        modeHelper.classList.toggle("show", eliminationMode);
+        let helperText = "";
+        if(eliminationMode){
+          helperText = "Mode eliminasi aktif: klik box untuk tandai / buka eliminasi.";
+        }else if(continueMode){
+          helperText = "Mode continue aktif: hanya box yang dipilih yang akan terbuka.";
+        }
+
+        modeHelper.textContent = helperText;
+        modeHelper.classList.toggle("show", Boolean(helperText));
       }
     }
 
     function resetRound(){
       pickedIndex = null;
+      openedIndexes = [];
       isRevealing = false;
       isShuffling = false;
       enableControls(true);
@@ -1090,6 +1163,7 @@
       if(isRevealing || pickedIndex !== null || isShuffling) return;
 
       isShuffling = true;
+      openedIndexes = [];
       enableControls(false);
       render(false);
 
@@ -1140,17 +1214,13 @@
       grid.querySelectorAll(".box").forEach(b => b.classList.remove("final-focus"));
     }
 
-    function pick(i){
-      if(eliminationMode){
-        if(isRevealing || isShuffling) return;
-        toggleElimination(mode, i);
-        render(false);
-        return;
-      }
+    function openSingleContinue(i){
+      openIndexInContinue(i);
+      render(false);
+      openPopup(slots[i]);
+    }
 
-      if(isEliminated(mode, i)) return;
-      if(pickedIndex !== null || isRevealing || isShuffling) return;
-
+    function openAllNormal(i){
       pickedIndex = i;
       isRevealing = true;
       enableControls(false);
@@ -1170,7 +1240,42 @@
       }, totalRevealTime + POPUP_DELAY_MS + FOCUS_AFTER_REVEAL_MS);
     }
 
-    function render(reveal){
+    function turnOffContinueAndRevealAll(){
+      continueMode = false;
+      updateFeatureButtonsUI();
+
+      if(!slots.length) return;
+
+      const allAlreadyVisible = slots.every((_, i) => isEliminated(mode, i) || isOpenedInContinue(i));
+      if(allAlreadyVisible) return;
+
+      revealAllIndexes();
+      render(false);
+    }
+
+    function pick(i){
+      if(eliminationMode){
+        if(isRevealing || isShuffling) return;
+        if(isOpenedInContinue(i)) return;
+        toggleElimination(mode, i);
+        render(false);
+        return;
+      }
+
+      if(isEliminated(mode, i)) return;
+      if(isOpenedInContinue(i)) return;
+      if(isRevealing || isShuffling) return;
+
+      if(continueMode){
+        openSingleContinue(i);
+        return;
+      }
+
+      if(pickedIndex !== null) return;
+      openAllNormal(i);
+    }
+
+    function render(revealAll){
       grid.innerHTML = "";
 
       for(let i = 0; i < slots.length; i++){
@@ -1178,20 +1283,26 @@
         div.className = "box";
 
         const eliminated = isEliminated(mode, i);
-        const shouldReveal = reveal || eliminated;
+        const openedContinue = isOpenedInContinue(i);
+        const shouldReveal = revealAll || eliminated || openedContinue;
 
         if(isRevealing || isShuffling) div.classList.add("disabled");
         if(shouldReveal) div.classList.add("revealed");
         if(pickedIndex === i) div.classList.add("picked");
         if(eliminated) div.classList.add("eliminated");
+        if(openedContinue && !eliminated) div.classList.add("opened-continue");
 
         div.style.setProperty("--d", (i * STAGGER_MS) + "ms");
 
         const prize = slots[i];
         const imgSrc = prize?.img || makeEmojiDataUrl("🎁");
 
+        let tagText = "PICK";
+        if(eliminated) tagText = "ELIMINASI";
+        else if(openedContinue) tagText = "OPEN";
+
         div.innerHTML = `
-          <div class="tag">${eliminated ? "ELIMINASI" : "PICK"}</div>
+          <div class="tag">${tagText}</div>
           <div class="num">${i + 1}</div>
           <div class="gift">
             <img class="giftImg" src="${escapeAttr(imgSrc)}" alt="">
@@ -1575,12 +1686,25 @@
       elimToggleBtn?.addEventListener("click", () => {
         if(isRevealing || isShuffling) return;
         eliminationMode = !eliminationMode;
-        updateEliminationToggleUI();
+        if(eliminationMode) continueMode = false;
+        updateFeatureButtonsUI();
+      });
+
+      continueToggleBtn?.addEventListener("click", () => {
+        if(isRevealing || isShuffling) return;
+
+        if(continueMode){
+          turnOffContinueAndRevealAll();
+        }else{
+          eliminationMode = false;
+          continueMode = true;
+          updateFeatureButtonsUI();
+        }
       });
 
       mode = "hemat";
       modeNote.textContent = `Mode: ${mode.toUpperCase()} (${PRICE[mode] || "-"})`;
-      updateEliminationToggleUI();
+      updateFeatureButtonsUI();
       resetRound();
     }
   </script>
